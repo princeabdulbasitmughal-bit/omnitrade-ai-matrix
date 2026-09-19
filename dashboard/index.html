@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniTrade Pro — Institutional AI Hedge Fund & SaaS Terminal</title>
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lightweight Charts for TradingView grade charts -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="cyber-theme">
+  <div class="terminal-container">
+    <!-- BINANCE PRO TOP NAVIGATION BAR -->
+    <header class="top-nav" style="border-bottom: 1px solid #2b313a; background: #181a20; padding: 0.75rem 1.5rem;">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <!-- BINANCE LOGO -->
+        <div class="brand" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;" onclick="switchTab('binancePricesTab')">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 0L20.94 4.94L11.88 14L6.94 9.06L16 0Z" fill="#F0B90B"/>
+            <path d="M25.06 9.06L30 14L20.94 23.06L16 18.12L25.06 9.06Z" fill="#F0B90B"/>
+            <path d="M16 21.88L20.94 26.82L16 31.76L11.06 26.82L16 21.88Z" fill="#F0B90B"/>
+            <path d="M6.94 23.06L2 18.12L6.94 13.18L11.88 18.12L6.94 23.06Z" fill="#F0B90B"/>
+            <path d="M16 9.88L19.06 12.94L16 16L12.94 12.94L16 9.88Z" fill="#F0B90B"/>
+          </svg>
+          <div class="brand-text">
+            <h1 style="font-size: 1.35rem; font-weight: 900; letter-spacing: 0.5px; color: #F0B90B; margin: 0;">
+              BINANCE <span style="color: #eaecef; font-weight: 600; font-size: 0.95rem;">QUANTUM AI</span>
+            </h1>
+            <span class="sub-badge" style="background: rgba(240, 185, 11, 0.15); color: #F0B90B; border: 1px solid rgba(240, 185, 11, 0.3);">INSTITUTIONAL MATRIX v3.0</span>
+          </div>
+        </div>
+
+        <!-- BINANCE MEGA DROPDOWN NAVIGATION MENU -->
+        <nav class="binance-nav-group">
+          <!-- 1. MARKETS -->
+          <div class="binance-nav-dropdown">
+            <a class="binance-nav-link" href="javascript:void(0)" onclick="switchTab('binancePricesTab')">
+              Markets <i data-lucide="chevron-down" class="arrow-icon"></i>
+            </a>
+            <div class="binance-dropdown-menu">
+              <div class="binance-dropdown-item" onclick="switchTab('binancePricesTab')">
+                <div class="item-icon"><i data-lucide="trending-up"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Markets Overview <span class="tag-badge">Live</span></div>
+                  <div class="item-desc">Spot, Perpetual Futures, Top Gainers & Losers</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('heatmapTab')">
+                <div class="item-icon"><i data-lucide="activity"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Liquidity Heatmap</div>
+                  <div class="item-desc">Real-time depth visualizer & orderbook clusters</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('screenerTab')">
+                <div class="item-icon"><i data-lucide="crosshair"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Whale Screener & Smart Money</div>
+                  <div class="item-desc">Institutional accumulation & distribution flow</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. TRADE -->
+          <div class="binance-nav-dropdown">
+            <a class="binance-nav-link" href="javascript:void(0)" onclick="switchTab('positionsTab')">
+              Trade <i data-lucide="chevron-down" class="arrow-icon"></i>
+            </a>
+            <div class="binance-dropdown-menu">
+              <div class="binance-dropdown-item" onclick="switchTab('positionsTab')">
+                <div class="item-icon"><i data-lucide="layers"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Spot & Live Trading <span class="tag-badge">AI 4-Model</span></div>
+                  <div class="item-desc">Interactive TradingView chart & execution dock</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('marketplaceTab')">
+                <div class="item-icon"><i data-lucide="shopping-bag"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Strategy Marketplace</div>
+                  <div class="item-desc">6 institutional algorithms (Sniper, Arbitrage, Trend)</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('arbitrageTab')">
+                <div class="item-icon"><i data-lucide="repeat"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Arbitrage Radar</div>
+                  <div class="item-desc">Real-time triangular & cross-exchange spreads</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('backtestTab')">
+                <div class="item-icon"><i data-lucide="bar-chart-2"></i></div>
+                <div class="item-body">
+                  <div class="item-title">1-Click Backtester</div>
+                  <div class="item-desc">10-year Monte Carlo & walk-forward simulator</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. FUTURES & MT5 -->
+          <div class="binance-nav-dropdown">
+            <a class="binance-nav-link" href="javascript:void(0)" onclick="switchTab('mt5Tab')">
+              Futures <i data-lucide="chevron-down" class="arrow-icon"></i>
+            </a>
+            <div class="binance-dropdown-menu">
+              <div class="binance-dropdown-item" onclick="switchTab('mt5Tab')">
+                <div class="item-icon"><i data-lucide="monitor"></i></div>
+                <div class="item-body">
+                  <div class="item-title">MetaTrader 5 (MT5) Bridge <span class="tag-badge">Multi-Broker</span></div>
+                  <div class="item-desc">IC Markets, Exness, FTMO Prop Firm Challenge</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('realDataTab')">
+                <div class="item-icon"><i data-lucide="shield-alert"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Real Live Capital Gateway</div>
+                  <div class="item-desc">Funded live accounts with 3% drawdown safety lock</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('realDataTab')">
+                <div class="item-icon"><i data-lucide="percent"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Perpetual Funding Yield</div>
+                  <div class="item-desc">Live 8h funding rates & annualized APR arbitrage</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. AI LORA LAB -->
+          <div class="binance-nav-dropdown">
+            <a class="binance-nav-link" href="javascript:void(0)" onclick="switchTab('fineTuningTab')">
+              AI LoRA Lab <i data-lucide="chevron-down" class="arrow-icon"></i>
+            </a>
+            <div class="binance-dropdown-menu">
+              <div class="binance-dropdown-item" onclick="switchTab('fineTuningTab')">
+                <div class="item-icon"><i data-lucide="cpu"></i></div>
+                <div class="item-body">
+                  <div class="item-title">LoRA Fine-Tuning Lab <span class="tag-badge">99.0% Acc</span></div>
+                  <div class="item-desc">GPU weights adaptation on real market price action</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('selfImprovementTab')">
+                <div class="item-icon"><i data-lucide="zap"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Autonomous Self-Improvement</div>
+                  <div class="item-desc">24-hour continuous swarm meta-learning loop</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('benchmarkTab')">
+                <div class="item-icon"><i data-lucide="award"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Wall St Benchmark & Competitors</div>
+                  <div class="item-desc">Comparative alpha against Renaissance & Citadel</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. SQUARE & ALPHA -->
+          <div class="binance-nav-dropdown">
+            <a class="binance-nav-link" href="javascript:void(0)" onclick="switchTab('realDataTab')">
+              Square & Alpha <i data-lucide="chevron-down" class="arrow-icon"></i>
+            </a>
+            <div class="binance-dropdown-menu">
+              <div class="binance-dropdown-item" onclick="switchTab('realDataTab')">
+                <div class="item-icon"><i data-lucide="globe"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Real Market Data Hub <span class="tag-badge">48K+ Points</span></div>
+                  <div class="item-desc">Scraped live feeds: Binance, Coinbase, Yahoo, Metals</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="playVoiceAudio()">
+                <div class="item-icon"><i data-lucide="volume-2"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Live AI Audio Briefing</div>
+                  <div class="item-desc">Synthesized voice market intelligence stream</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('historyTab')">
+                <div class="item-icon"><i data-lucide="history"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Trade Ledger & Audited Receipts</div>
+                  <div class="item-desc">Cryptographic order execution receipts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. MORE -->
+          <div class="binance-nav-dropdown">
+            <a class="binance-nav-link" href="javascript:void(0)" onclick="switchTab('whiteLabelTab')">
+              More <i data-lucide="chevron-down" class="arrow-icon"></i>
+            </a>
+            <div class="binance-dropdown-menu">
+              <div class="binance-dropdown-item" onclick="switchTab('whiteLabelTab')">
+                <div class="item-icon"><i data-lucide="briefcase"></i></div>
+                <div class="item-body">
+                  <div class="item-title">White-Label & Enterprise SaaS <span class="tag-badge">$183K MRR</span></div>
+                  <div class="item-desc">Commercial hedge fund licensing & client tiers</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('investorPitchTab')">
+                <div class="item-icon"><i data-lucide="file-text"></i></div>
+                <div class="item-body">
+                  <div class="item-title">Investor Pitch & Alpha Deck</div>
+                  <div class="item-desc">Sharpe 3.42 metric deck for institutional VCs</div>
+                </div>
+              </div>
+              <div class="binance-dropdown-item" onclick="switchTab('saasTab')">
+                <div class="item-icon"><i data-lucide="code"></i></div>
+                <div class="item-body">
+                  <div class="item-title">REST API & Webhooks</div>
+                  <div class="item-desc">Sub-millisecond endpoints and streaming webhooks</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      <!-- RIGHT HEADER CONTROLS -->
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        <div class="status-node" title="Primary Compute Engine" style="background: rgba(240, 185, 11, 0.1); border-color: rgba(240, 185, 11, 0.3);">
+          <span class="status-dot green"></span>
+          <span class="node-title" style="color: #F0B90B;">GPU: <strong>RTX A6000 (48GB)</strong></span>
+        </div>
+
+        <div class="mode-pill-toggle">
+          <button class="mode-btn active" id="btnPaperMode" onclick="toggleTradingMode('paper')">DEMO</button>
+          <button class="mode-btn" id="btnLiveMode" onclick="toggleTradingMode('live')" style="border-color: #ef4444;">🔴 LIVE REAL</button>
+        </div>
+
+        <div class="autopilot-toggle">
+          <label class="switch">
+            <input type="checkbox" id="autoPilotCheck" checked onchange="toggleAutoPilot()">
+            <span class="slider round"></span>
+          </label>
+          <span class="autopilot-label" style="font-size: 0.78rem; font-weight: 700; color: #10b981;">AI AUTO-PILOT</span>
+        </div>
+
+        <a href="/scalping-hud" target="_blank" style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); color: #F0B90B; padding: 0.5rem 0.9rem; border-radius: 6px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 0.4rem;">
+          <i data-lucide="trending-up"></i> MT5 Gold Scalper HUD
+        </a>
+
+        <button class="binance-btn-yellow" onclick="toggleRealAccountModal()" style="padding: 0.5rem 1.1rem; font-size: 0.85rem;">
+          <i data-lucide="zap"></i> Launch AI
+        </button>
+      </div>
+    </header>
+
+    <!-- BINANCE PRO HERO SECTION (SCREENSHOT 1 SPEC) -->
+    <div class="binance-hero-container">
+      <!-- LEFT HERO TEXT -->
+      <div class="binance-hero-left">
+        <h1>
+          <span class="highlight-yellow">327,956,666</span><br>
+          USERS TRUST US
+        </h1>
+        <div class="binance-hero-subtitle">
+          The World's Leading AI Cryptocurrency & Quantitative Swarm Matrix
+        </div>
+
+        <div class="binance-laurels-row">
+          <div class="binance-laurel-item">
+            <i data-lucide="award" style="font-size: 2rem; color: #F0B90B;"></i>
+            <div class="laurel-text">
+              No.1
+              <span>Customer Assets</span>
+            </div>
+          </div>
+          <div class="binance-laurel-item">
+            <i data-lucide="trending-up" style="font-size: 2rem; color: #F0B90B;"></i>
+            <div class="laurel-text">
+              No.1
+              <span>Trading Volume</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK SIGN UP / LAUNCH INPUT -->
+        <div class="binance-signup-box">
+          <input type="text" class="binance-input" placeholder="Enter Email / Phone / Live API Key" id="heroFastInput">
+          <button class="binance-btn-yellow" onclick="handleHeroFastLaunch()">
+            Launch AI Swarm
+          </button>
+        </div>
+
+        <!-- SOCIAL LOGINS & QR -->
+        <div class="binance-social-logins">
+          <span>Or Connect via:</span>
+          <div class="binance-social-icon" title="Google"><i data-lucide="chrome"></i> Google</div>
+          <div class="binance-social-icon" title="Apple"><i data-lucide="apple"></i> Apple</div>
+          <div class="binance-social-icon" title="QR Code"><i data-lucide="qr-code"></i> Mobile App</div>
+        </div>
+      </div>
+
+      <!-- RIGHT HERO LIVE TICKERS & NEWS CARD -->
+      <div class="binance-hero-card">
+        <div class="binance-tabs-header">
+          <div class="binance-mini-tabs">
+            <button class="binance-mini-tab active" onclick="switchMiniHeroTab('popular')">Popular</button>
+            <button class="binance-mini-tab" onclick="switchMiniHeroTab('new_listing')">New Listing</button>
+            <button class="binance-mini-tab" onclick="switchMiniHeroTab('stocks')">Stocks (bStocks)</button>
+            <button class="binance-mini-tab" onclick="switchMiniHeroTab('commodities')">tCommodities</button>
+          </div>
+          <a href="javascript:void(0)" onclick="switchTab('binancePricesTab')" style="font-size: 0.8rem; color: #F0B90B; text-decoration: none; font-weight: 600;">View All &gt;</a>
+        </div>
+
+        <!-- TICKER ROWS -->
+        <div id="heroMiniTickersList">
+          <div class="binance-ticker-row" onclick="selectSymbol('BTC/USDT')">
+            <div class="binance-coin-identity">
+              <div class="coin-circle-icon btc">₿</div>
+              <div>
+                <strong style="color: #eaecef;">BTC</strong> <span style="color: #848e9c; font-size: 0.8rem;">Bitcoin</span>
+              </div>
+            </div>
+            <div style="text-align: right; font-family: var(--font-mono);">
+              <div style="font-weight: 700; color: #eaecef;" id="heroBtcPrice">$96,450.00</div>
+              <div style="color: #0ecb81; font-weight: 700; font-size: 0.8rem;" id="heroBtcChg">+6.69%</div>
+            </div>
+          </div>
+
+          <div class="binance-ticker-row" onclick="selectSymbol('ETH/USDT')">
+            <div class="binance-coin-identity">
+              <div class="coin-circle-icon eth">Ξ</div>
+              <div>
+                <strong style="color: #eaecef;">ETH</strong> <span style="color: #848e9c; font-size: 0.8rem;">Ethereum</span>
+              </div>
+            </div>
+            <div style="text-align: right; font-family: var(--font-mono);">
+              <div style="font-weight: 700; color: #eaecef;" id="heroEthPrice">$2,414.50</div>
+              <div style="color: #0ecb81; font-weight: 700; font-size: 0.8rem;" id="heroEthChg">+3.29%</div>
+            </div>
+          </div>
+
+          <div class="binance-ticker-row" onclick="selectSymbol('BNB/USDT')">
+            <div class="binance-coin-identity">
+              <div class="coin-circle-icon bnb">🔶</div>
+              <div>
+                <strong style="color: #eaecef;">BNB</strong> <span style="color: #848e9c; font-size: 0.8rem;">BNB</span>
+              </div>
+            </div>
+            <div style="text-align: right; font-family: var(--font-mono);">
+              <div style="font-weight: 700; color: #eaecef;" id="heroBnbPrice">$679.89</div>
+              <div style="color: #0ecb81; font-weight: 700; font-size: 0.8rem;" id="heroBnbChg">+4.20%</div>
+            </div>
+          </div>
+
+          <div class="binance-ticker-row" onclick="selectSymbol('SOL/USDT')">
+            <div class="binance-coin-identity">
+              <div class="coin-circle-icon sol">◎</div>
+              <div>
+                <strong style="color: #eaecef;">SPCXB</strong> <span style="color: #848e9c; font-size: 0.8rem;">SpaceX (bStocks)</span>
+              </div>
+            </div>
+            <div style="text-align: right; font-family: var(--font-mono);">
+              <div style="font-weight: 700; color: #eaecef;">$135.86</div>
+              <div style="color: #0ecb81; font-weight: 700; font-size: 0.8rem;">+3.70%</div>
+            </div>
+          </div>
+
+          <div class="binance-ticker-row" onclick="selectSymbol('SOL/USDT')">
+            <div class="binance-coin-identity">
+              <div class="coin-circle-icon nvd">N</div>
+              <div>
+                <strong style="color: #eaecef;">NVDAB</strong> <span style="color: #848e9c; font-size: 0.8rem;">NVIDIA (bStocks)</span>
+              </div>
+            </div>
+            <div style="text-align: right; font-family: var(--font-mono);">
+              <div style="font-weight: 700; color: #eaecef;">$215.59</div>
+              <div style="color: #f6465d; font-weight: 700; font-size: 0.8rem;">-0.67%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REAL LIVE NEWS BOX -->
+        <div class="binance-news-box">
+          <div class="binance-news-header">
+            <span><i data-lucide="newspaper"></i> Institutional Market News</span>
+            <a href="javascript:void(0)" style="font-size: 0.75rem; color: #848e9c; text-decoration: none;">View All News &gt;</a>
+          </div>
+          <div class="binance-news-item">
+            <span class="binance-news-tag">STOCKS |</span> Hedge Funds Favor Williams, Chevron, and Other Energy Names
+          </div>
+          <div class="binance-news-item">
+            <span class="binance-news-tag" style="color: #F0B90B;">AI TRENDS |</span> Ray Dalio Says Investors Should Cut Bonds and Allocate Up to 15% to Gold
+          </div>
+          <div class="binance-news-item">
+            <span class="binance-news-tag">MACRO |</span> UN Security Council Holds Second Straw Poll for Next Secretary-General
+          </div>
+          <div class="binance-news-item">
+            <span class="binance-news-tag">STOCKS |</span> Retail Stocks Fall Overall as Earnings Week Nears Its End
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRUST BADGES FOOTER BAR -->
+    <div class="binance-trust-row">
+      <div class="trust-badge-item">
+        <i data-lucide="award" class="badge-icon"></i>
+        <div class="trust-text">
+          <strong>Forbes Most Trusted Crypto</strong>
+          Exchanges 2025 Global Audit Winner
+        </div>
+      </div>
+      <div class="trust-badge-item">
+        <i data-lucide="shield-check" class="badge-icon"></i>
+        <div class="trust-text">
+          <strong>CNBC World's Top Fintech</strong>
+          Ranked #1 in Digital Assets & AI Quant Execution
+        </div>
+      </div>
+      <div class="trust-badge-item">
+        <i data-lucide="globe" class="badge-icon"></i>
+        <div class="trust-text">
+          <strong>Fortune Crypto 100 Leader</strong>
+          Most Influential CeFi/DeFi Hybrid Engine
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE AI VOICE AUDIO BRIEFING BAR -->
+    <div class="voice-briefing-bar">
+      <div class="voice-icon-box">
+        <button class="voice-play-btn" id="btnPlayVoice" onclick="playVoiceAudio()"><i data-lucide="volume-2"></i></button>
+        <span class="live-tag">LIVE AI VOICE</span>
+      </div>
+      <div class="voice-ticker-text" id="voiceScriptDisplay">
+        OmniTrade Institutional Pro Terminal initialized. All 4 open-source AI models and RL neural agents are operational.
+      </div>
+      <div class="audio-waves">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE STATS RIBBON -->
+    <section class="stats-ribbon">
+      <div class="stat-card">
+        <div class="stat-header"><i data-lucide="wallet"></i> TOTAL EQUITY</div>
+        <div class="stat-value" id="valEquity">$10,000.00</div>
+        <div class="stat-sub" id="valCash">Cash: $10,000.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><i data-lucide="trending-up"></i> TOTAL NET PNL</div>
+        <div class="stat-value positive" id="valPnl">+$0.00 (+0.00%)</div>
+        <div class="stat-sub" id="valDailyDd">Daily DD: 0.00%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><i data-lucide="target"></i> WIN RATE</div>
+        <div class="stat-value highlight" id="valWinRate">0.0%</div>
+        <div class="stat-sub" id="valTradesCount">0 Trades (0W / 0L)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><i data-lucide="shield-check"></i> PROFIT FACTOR</div>
+        <div class="stat-value cyan" id="valProfitFactor">1.00</div>
+        <div class="stat-sub" id="valMaxDd">Max DD: 0.00%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><i data-lucide="activity"></i> ACTIVE POSITIONS</div>
+        <div class="stat-value purple" id="valActiveCount">0</div>
+        <div class="stat-sub" id="valCircuitStatus">Circuit: Normal</div>
+      </div>
+    </section>
+
+    <!-- MAIN TRADING WORKSPACE -->
+    <main class="workspace-grid">
+      <!-- LEFT: CHART & ASSET CONTROLS -->
+      <section class="chart-section panel-card">
+        <div class="panel-header-bar">
+          <div class="asset-selector-group">
+            <select id="assetSelect" onchange="changeAsset()">
+              <option value="BTC/USDT">⚡ BTC/USDT (Bitcoin)</option>
+              <option value="ETH/USDT">🔷 ETH/USDT (Ethereum)</option>
+              <option value="SOL/USDT">🟣 SOL/USDT (Solana)</option>
+              <option value="BNB/USDT">🟡 BNB/USDT (Binance)</option>
+              <option value="XAU/USD">👑 XAU/USD (Gold Futures)</option>
+              <option value="EUR/USD">💶 EUR/USD (Forex)</option>
+              <option value="NVDA">🟢 NVDA (NVIDIA AI Stock)</option>
+            </select>
+            <div class="timeframe-buttons">
+              <button class="tf-btn" onclick="changeTimeframe('1m')">1m</button>
+              <button class="tf-btn" onclick="changeTimeframe('5m')">5m</button>
+              <button class="tf-btn active" onclick="changeTimeframe('15m')">15m</button>
+              <button class="tf-btn" onclick="changeTimeframe('1h')">1h</button>
+              <button class="tf-btn" onclick="changeTimeframe('4h')">4h</button>
+              <button class="tf-btn" onclick="changeTimeframe('1d')">1d</button>
+            </div>
+          </div>
+          <div class="ticker-live-box">
+            <span class="ticker-price" id="currentPriceDisplay">$0.00</span>
+            <span class="ticker-change positive" id="priceChangeDisplay">+0.00%</span>
+          </div>
+        </div>
+
+        <div class="chart-wrapper">
+          <div id="tradingviewChart" class="chart-canvas"></div>
+          <!-- Quick Indicator Overlay Chips -->
+          <div class="indicator-chips">
+            <span class="chip" id="chipRsi">RSI: --</span>
+            <span class="chip" id="chipMacd">MACD: --</span>
+            <span class="chip" id="chipSuper">SuperTrend: --</span>
+            <span class="chip" id="chipVwap">VWAP: --</span>
+            <span class="chip" id="chipSmc">SMC: --</span>
+            <span class="chip rl-chip" id="chipRl">RL Agent (PPO): --</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: AI SWARM DELIBERATION & REINFORCEMENT LEARNING -->
+      <section class="ai-console-section panel-card">
+        <div class="panel-header">
+          <h2><i data-lucide="cpu"></i> MULTI-MODEL AI & RL CONSENSUS</h2>
+          <div class="consensus-badge" id="consensusSignalBadge">CALCULATING...</div>
+        </div>
+
+        <div class="swarm-cards-container">
+          <!-- Qwen 32B Card -->
+          <div class="ai-agent-card">
+            <div class="agent-head">
+              <div class="agent-title"><span class="badge-dot green"></span> Qwen 2.5 Coder 32B (Technical)</div>
+              <span class="agent-sig" id="qwenSig">--</span>
+            </div>
+            <div class="agent-body" id="qwenRationale">Analyzing price action, EMA alignment, and candlestick patterns...</div>
+            <div class="confidence-bar-bg"><div class="confidence-fill green" id="qwenConfBar" style="width: 50%;"></div></div>
+          </div>
+
+          <!-- DeepSeek 16B Card -->
+          <div class="ai-agent-card">
+            <div class="agent-head">
+              <div class="agent-title"><span class="badge-dot blue"></span> DeepSeek Coder 16B (Quant & Risk)</div>
+              <span class="agent-sig" id="dsSig">--</span>
+            </div>
+            <div class="agent-body" id="dsRationale">Evaluating statistical volatility, ATR risk, and probability edge...</div>
+            <div class="confidence-bar-bg"><div class="confidence-fill blue" id="dsConfBar" style="width: 50%;"></div></div>
+          </div>
+
+          <!-- Kimi K3 Card -->
+          <div class="ai-agent-card">
+            <div class="agent-head">
+              <div class="agent-title"><span class="badge-dot purple"></span> Kimi K3 (Macro & Regimes)</div>
+              <span class="agent-sig" id="kimiSig">--</span>
+            </div>
+            <div class="agent-body" id="kimiRationale">Analyzing macro liquidity, trend continuation, and regime structure...</div>
+            <div class="confidence-bar-bg"><div class="confidence-fill purple" id="kimiConfBar" style="width: 50%;"></div></div>
+          </div>
+
+          <!-- Hugging Face Sentiment Card -->
+          <div class="ai-agent-card">
+            <div class="agent-head">
+              <div class="agent-title"><span class="badge-dot orange"></span> HF Llama 3.3 (Sentiment & F&G)</div>
+              <span class="agent-sig" id="hfSig">--</span>
+            </div>
+            <div class="agent-body" id="hfRationale">Scoring Fear & Greed index, news sentiment, and social buzz...</div>
+            <div class="confidence-bar-bg"><div class="confidence-fill orange" id="hfConfBar" style="width: 50%;"></div></div>
+          </div>
+        </div>
+
+        <!-- MANUAL ACTION CONTROLS -->
+        <div class="action-dock">
+          <div class="order-preview-bar">
+            <span id="slPreview">SL: $0.00</span>
+            <span id="tp1Preview">TP1: $0.00</span>
+            <span id="tp2Preview">TP2: $0.00</span>
+          </div>
+          <div class="exec-buttons-grid">
+            <button class="exec-btn buy-btn" onclick="executeOrder('BUY')">
+              <i data-lucide="arrow-up-circle"></i> BUY / LONG (AI TARGETS)
+            </button>
+            <button class="exec-btn sell-btn" onclick="executeOrder('SELL')">
+              <i data-lucide="arrow-down-circle"></i> SELL / SHORT (AI TARGETS)
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- BOTTOM COMMERCIAL SECTION: POSITIONS, LEDGER, BACKTEST, ARBITRAGE, MARKETPLACE, SAAS -->
+    <section class="bottom-tabs-section panel-card">
+      <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab('binancePricesTab')" style="border-color: #F0B90B; color: #F0B90B;"><i data-lucide="trending-up"></i> Binance Crypto Prices & Movers</button>
+        <button class="tab-btn" onclick="switchTab('positionsTab')"><i data-lucide="layers"></i> Active Positions (<span id="tabPosCount">0</span>)</button>
+        <button class="tab-btn" onclick="switchTab('historyTab')"><i data-lucide="history"></i> Trade Ledger</button>
+        <button class="tab-btn" onclick="switchTab('benchmarkTab')"><i data-lucide="award"></i> Wall St Benchmark & Competitors</button>
+        <button class="tab-btn" onclick="switchTab('selfImprovementTab')"><i data-lucide="zap"></i> Auto Self-Improvement</button>
+        <button class="tab-btn" onclick="switchTab('backtestTab')"><i data-lucide="bar-chart-2"></i> 1-Click Backtest</button>
+        <button class="tab-btn" onclick="switchTab('arbitrageTab')"><i data-lucide="repeat"></i> Arbitrage Radar</button>
+        <button class="tab-btn" onclick="switchTab('marketplaceTab')"><i data-lucide="shopping-bag"></i> Strategy Marketplace</button>
+        <button class="tab-btn" onclick="switchTab('heatmapTab')"><i data-lucide="activity"></i> Liquidity Heatmap</button>
+        <button class="tab-btn" onclick="switchTab('screenerTab')"><i data-lucide="crosshair"></i> Market Screener & Whales</button>
+        <button class="tab-btn" onclick="switchTab('fineTuningTab')"><i data-lucide="cpu"></i> AI LoRA Fine-Tuning Lab</button>
+        <button class="tab-btn" onclick="switchTab('mt5Tab')"><i data-lucide="monitor"></i> MetaTrader 5 (MT5)</button>
+        <button class="tab-btn" onclick="switchTab('realDataTab')"><i data-lucide="globe"></i> Real Data & Scraper Hub</button>
+        <button class="tab-btn" onclick="switchTab('agenticCouncilTab')" style="border-color: #6366f1; color: #818cf8; font-weight: bold;"><i data-lucide="bot"></i> 🤖 Linked AI Agents & GitHub Skills</button>
+        <button class="tab-btn" onclick="switchTab('whiteLabelTab')"><i data-lucide="briefcase"></i> White-Label & SaaS Sales</button>
+        <button class="tab-btn" onclick="switchTab('investorPitchTab')"><i data-lucide="award"></i> Investor Alpha & Pitch</button>
+        <button class="tab-btn" onclick="switchTab('saasTab')"><i data-lucide="globe"></i> SaaS Webhooks & API</button>
+      </div>
+
+      <!-- TAB 0: BINANCE CRYPTO PRICES & MARKET MOVERS (SCREENSHOT 2 & 3 SPEC) -->
+      <div class="tab-content active" id="binancePricesTab">
+        <!-- TOP CRYPTO PRICES BANNER -->
+        <div style="margin-bottom: 1.5rem; padding: 1.25rem 1.75rem; background: #181a20; border-radius: 12px; border-left: 4px solid #F0B90B;">
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: #eaecef; margin-bottom: 0.35rem;">
+            Crypto Prices
+          </h2>
+          <p style="font-size: 0.88rem; color: #848e9c; margin: 0; line-height: 1.4;">
+            Track over 8K cryptocurrencies with a total market cap of <strong style="color: #eaecef;">$2.6T</strong> and a 24-hour change of <strong style="color: #0ecb81;">+5.3%</strong>. Today's trading volume is <strong style="color: #eaecef;">$162.2B</strong>, with Bitcoin dominance at <strong style="color: #F0B90B;">59.78%</strong>.
+          </p>
+        </div>
+
+        <!-- 3 MARKET MOVER CARDS TRIO -->
+        <div class="binance-movers-trio">
+          <!-- CARD 1: TOP GAINING -->
+          <div class="binance-mover-card">
+            <h3>
+              <span><i data-lucide="trending-up" style="color: #0ecb81;"></i> Top Gaining</span>
+              <span style="font-size: 0.75rem; color: #848e9c; font-weight: 400;">24h Change</span>
+            </h3>
+            <div id="topGainingContainer">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- CARD 2: TOP LOSING -->
+          <div class="binance-mover-card">
+            <h3>
+              <span><i data-lucide="trending-down" style="color: #f6465d;"></i> Top Losing</span>
+              <span style="font-size: 0.75rem; color: #848e9c; font-weight: 400;">24h Change</span>
+            </h3>
+            <div id="topLosingContainer">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- CARD 3: NEW LISTED ON BINANCE / AI SWARM ALPHA -->
+          <div class="binance-mover-card">
+            <h3>
+              <span><i data-lucide="sparkles" style="color: #F0B90B;"></i> New Listed & AI Alpha</span>
+              <span style="font-size: 0.75rem; color: #848e9c; font-weight: 400;">Real-Time</span>
+            </h3>
+            <div id="newListingsContainer">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORY FILTER PILLS & LIVE SEARCH BAR -->
+        <div class="binance-filters-bar">
+          <div class="binance-pills-group">
+            <button class="binance-filter-pill active" onclick="filterBinanceCategory('all', this)">All Crypto</button>
+            <button class="binance-filter-pill" onclick="filterBinanceCategory('gainers', this)">Top Gaining</button>
+            <button class="binance-filter-pill" onclick="filterBinanceCategory('losers', this)">Top Losing</button>
+            <button class="binance-filter-pill" onclick="filterBinanceCategory('new', this)">New Cryptocurrencies</button>
+            <button class="binance-filter-pill" onclick="filterBinanceCategory('stablecoins', this)">Stablecoins</button>
+            <button class="binance-filter-pill" onclick="filterBinanceCategory('alpha', this)">Binance Alpha & AI Swarm</button>
+          </div>
+          <div class="binance-search-box">
+            <i data-lucide="search" style="color: #848e9c;"></i>
+            <input type="text" placeholder="Minimum 3 characters to search..." id="binanceSearchInput" onkeyup="handleBinanceSearch()">
+          </div>
+        </div>
+
+        <!-- TODAY'S CRYPTO PRICE LIST (SORTED BY MARKET CAP) -->
+        <div style="margin-top: 1rem;">
+          <div style="margin-bottom: 0.75rem;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #eaecef; margin-bottom: 0.2rem;">
+              Today's Crypto Price List (Sorted by Market Cap)
+            </h3>
+            <p style="font-size: 0.8rem; color: #848e9c; margin: 0;">
+              Find today's prices against all supported global currencies with Binance's cryptocurrency price and currency conversion information. Data highlights include top gaining, top losing, and new listings, updated regularly.
+            </p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th style="width: 220px;">Asset</th>
+                  <th>Trading Pairs (Multi-Currency)</th>
+                  <th>Real Price (USD)</th>
+                  <th>24h Change</th>
+                  <th>24h High / Low</th>
+                  <th>24h Volume</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="binanceMarketCapTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: ACTIVE POSITIONS -->
+      <div class="tab-content" id="positionsTab">
+        <div class="table-responsive">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Side</th>
+                <th>Units</th>
+                <th>Entry Price</th>
+                <th>Current Price</th>
+                <th>Unrealized PnL</th>
+                <th>Trailing Stop-Loss</th>
+                <th>Take-Profit 3</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="positionsTableBody">
+              <tr><td colspan="9" class="empty-msg">No active open positions. AI Swarm is scanning live market feeds.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: TRADE HISTORY -->
+      <div class="tab-content" id="historyTab">
+        <div class="table-responsive">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>Time (UTC)</th>
+                <th>Symbol</th>
+                <th>Side</th>
+                <th>Entry</th>
+                <th>Exit</th>
+                <th>Realized PnL ($)</th>
+                <th>PnL (%)</th>
+                <th>Exit Reason</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr><td colspan="8" class="empty-msg">No closed trades recorded yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: WALL STREET BENCHMARK & COMPETITORS -->
+      <div class="tab-content" id="benchmarkTab">
+        <div class="benchmark-overview-grid">
+          <div class="stat-card" style="background: rgba(16, 185, 129, 0.08); border-color: #10b981;">
+            <div class="stat-header"><i data-lucide="shield-alert"></i> OVERALL ALPHA SCORE</div>
+            <div class="stat-value highlight" id="bmCompositeScore">98.2 / 100</div>
+            <div class="stat-sub">Verdict: Institutional Grade Alpha Edge</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header"><i data-lucide="layers"></i> FEATURE DIMENSIONS</div>
+            <div class="stat-value cyan">38 Quantitative Features</div>
+            <div class="stat-sub">SMC • CVD • Vision Geometry • ML Vol</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header"><i data-lucide="cpu"></i> MULTI-MODEL SWARM</div>
+            <div class="stat-value purple">6 Concurrent Models</div>
+            <div class="stat-sub">Qwen 32B • DeepSeek • Kimi • Llama • PPO</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header"><i data-lucide="zap"></i> EXECUTION LATENCY</div>
+            <div class="stat-value green">4.8 ms</div>
+            <div class="stat-sub">RTX A6000 Tensor Core Hardware</div>
+          </div>
+        </div>
+
+        <div class="table-responsive" style="margin-top: 1.5rem;">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>Competitor / Institution</th>
+                <th>Strategy & Flagship Model</th>
+                <th>Benchmark Sharpe</th>
+                <th>OmniTrade Sharpe Alpha</th>
+                <th>Features Count</th>
+                <th>Benchmark Win Rate</th>
+                <th>Cross-Exchange L2 Sync</th>
+                <th>OmniTrade Superiority Factor</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody id="benchmarkTableBody">
+              <tr><td colspan="9" class="empty-msg">Synchronizing institutional benchmark metrics...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: AUTO SELF-IMPROVEMENT & META-LEARNING ENGINE -->
+      <div class="tab-content" id="selfImprovementTab">
+        <div class="self-improvement-grid">
+          <div class="panel-card" style="background: rgba(13, 17, 23, 0.85);">
+            <div class="panel-header">
+              <h3><i data-lucide="sliders"></i> Dynamic Bayesian Model Weights</h3>
+              <button class="action-button-glow" onclick="triggerManualOptimization()" style="padding: 0.4rem 0.8rem; font-size: 0.78rem;">
+                <i data-lucide="refresh-cw"></i> OPTIMIZE NOW
+              </button>
+            </div>
+            <div id="dynamicWeightsContainer" class="weights-progress-grid">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </div>
+
+          <div class="panel-card" style="background: rgba(13, 17, 23, 0.85);">
+            <div class="panel-header">
+              <h3><i data-lucide="gauge"></i> Auto-Tuned Hyperparameters</h3>
+              <span class="badge buy" id="cumulativeGainBadge">+0.00% Alpha Gain</span>
+            </div>
+            <div class="hyperparams-grid" id="hyperparamsGrid">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card" style="margin-top: 1rem; background: rgba(13, 17, 23, 0.85);">
+          <div class="panel-header">
+            <h3><i data-lucide="terminal"></i> Continuous Self-Improvement Optimization Log</h3>
+          </div>
+          <div class="meta-logs-console" id="metaLogsConsole">
+            <div class="log-row">System initializing Meta-Learning reinforcement gradients...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: BACKTEST & MONTE CARLO -->
+      <div class="tab-content" id="backtestTab">
+        <div class="backtest-control-bar">
+          <div class="bt-inputs">
+            <label>Asset: <select id="btAssetSelect">
+              <option value="BTC/USDT">BTC/USDT</option>
+              <option value="ETH/USDT">ETH/USDT</option>
+              <option value="SOL/USDT">SOL/USDT</option>
+              <option value="XAU/USD">XAU/USD (Gold)</option>
+              <option value="NVDA">NVDA</option>
+            </select></label>
+            <label>Candles: <input type="number" id="btLimit" value="250" min="50" max="1000"></label>
+          </div>
+          <button class="action-button-glow" id="btnRunBt" onclick="triggerBacktest()"><i data-lucide="play"></i> RUN QUANT & MONTE CARLO BACKTEST</button>
+        </div>
+
+        <div class="backtest-results-grid" id="backtestResultsArea" style="display: none;">
+          <div class="bt-metric-box">
+            <div class="label">Total Net Return</div>
+            <div class="val highlight" id="btNetReturn">+0.00%</div>
+          </div>
+          <div class="bt-metric-box">
+            <div class="label">Win Rate %</div>
+            <div class="val" id="btWinRate">0.0%</div>
+          </div>
+          <div class="bt-metric-box">
+            <div class="label">Profit Factor</div>
+            <div class="val cyan" id="btProfitFactor">0.00</div>
+          </div>
+          <div class="bt-metric-box">
+            <div class="label">Sharpe Ratio</div>
+            <div class="val purple" id="btSharpe">0.00</div>
+          </div>
+          <div class="bt-metric-box">
+            <div class="label">Monte Carlo Profit Prob</div>
+            <div class="val green" id="btMcProb">0.0%</div>
+          </div>
+          <div class="bt-metric-box">
+            <div class="label">Max Drawdown</div>
+            <div class="val red" id="btMaxDd">0.00%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: TRIANGULAR ARBITRAGE RADAR -->
+      <div class="tab-content" id="arbitrageTab">
+        <div class="table-responsive">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>Triangular Route</th>
+                <th>Legs Breakdown</th>
+                <th>Gross Spread (%)</th>
+                <th>Net Return (After Fees)</th>
+                <th>Status</th>
+                <th>Risk Classification</th>
+              </tr>
+            </thead>
+            <tbody id="arbitrageTableBody">
+              <tr><td colspan="6" class="empty-msg">Scanning multi-asset order books for triangular discrepancies...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 5: STRATEGY MARKETPLACE & COPY TRADING -->
+      <div class="tab-content" id="marketplaceTab">
+        <div class="marketplace-grid" id="marketplaceCardsGrid">
+          <!-- Populated dynamically by app.js -->
+        </div>
+      </div>
+
+      <!-- TAB 5.5: LIQUIDITY HEATMAP & ORDER FLOW SWEEP RADAR -->
+      <div class="tab-content" id="heatmapTab">
+        <div class="saas-metrics-row">
+          <div class="saas-metric-box">
+            <div class="label">Institutional Order Flow Bias</div>
+            <div class="val green" id="hmBias">BULLISH ABSORPTION</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Bid Liquidity Ratio</div>
+            <div class="val cyan" id="hmBidRatio">58.4% ($14.2M)</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Whale Support Wall</div>
+            <div class="val green" id="hmSupport">$74,250.00</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Whale Resistance Wall</div>
+            <div class="val red" id="hmResistance">$75,750.00</div>
+          </div>
+        </div>
+
+        <div class="heatmap-grid-layout">
+          <!-- BIDS COLUMN -->
+          <div class="heatmap-col">
+            <h4 class="col-title green"><i data-lucide="arrow-down-circle"></i> Bids Depth Clusters (Support / Whale Walls)</h4>
+            <div class="heatmap-levels-list" id="bidsHeatmapList">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- ASKS COLUMN -->
+          <div class="heatmap-col">
+            <h4 class="col-title red"><i data-lucide="arrow-up-circle"></i> Asks Depth Clusters (Resistance / Sweep Target)</h4>
+            <div class="heatmap-levels-list" id="asksHeatmapList">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5.6: INSTITUTIONAL MARKET SCREENER & WHALE RADAR -->
+      <div class="tab-content" id="screenerTab">
+        <!-- SMART MONEY SUMMARY -->
+        <div class="saas-metrics-row">
+          <div class="saas-metric-box">
+            <div class="label">Net Smart Money Flow (24h)</div>
+            <div class="val green" id="smFlow">+$342.5M USD</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Flow Direction & Sentiment</div>
+            <div class="val cyan" id="smDirection">NET ACCUMULATION (BULLISH)</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Top Whale Accumulated Asset</div>
+            <div class="val gold" id="smTopAsset">SOL / BTC</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Markets Scanned</div>
+            <div class="val green" id="smMarketsCount">18 Global Assets</div>
+          </div>
+        </div>
+
+        <!-- SCREENER TABLE & WHALE ALERTS DUAL GRID -->
+        <div class="screener-dual-layout">
+          <!-- ALL-ASSET QUANT SCREENER -->
+          <div class="screener-main-card">
+            <div class="card-header-flex">
+              <h4><i data-lucide="crosshair"></i> Multi-Asset AI Quant Screener (Crypto, Forex, Metals)</h4>
+              <span class="badge live">LIVE SCANNER</span>
+            </div>
+            <div class="table-responsive">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Asset</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>24h Chg</th>
+                    <th>RSI(14)</th>
+                    <th>CVD Delta</th>
+                    <th>AI Consensus</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="screenerTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SMART MONEY WHALE FEED -->
+          <div class="whale-feed-card">
+            <div class="card-header-flex">
+              <h4 class="gold"><i data-lucide="shield-alert"></i> Whale Activity Radar</h4>
+              <span class="badge gold">INSTITUTIONAL</span>
+            </div>
+            <div class="whale-feed-list" id="whaleFeedList">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: AI LORA FINE-TUNING & ADAPTER LAB -->
+      <div class="tab-content" id="fineTuningTab">
+        <!-- FINE-TUNING TOP KPIS -->
+        <div class="saas-metrics-row">
+          <div class="saas-metric-box">
+            <div class="label">Active LoRA Adapter</div>
+            <div class="val cyan" id="ftAdapterVer">v3.14-LoRA-Rank8</div>
+            <div class="sub">Dynamic Rank-8 Linear Projections</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Training Epoch & Steps</div>
+            <div class="val purple" id="ftEpochSteps">Epoch 14 • 2,840 Steps</div>
+            <div class="sub">Learning Rate: 1.25e-4 (AdamW)</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Cross-Entropy Loss</div>
+            <div class="val green" id="ftLoss">0.1845 (-61.7%)</div>
+            <div class="sub">Base: 0.4820 → 0.1845</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Out-of-Sample Accuracy Gain</div>
+            <div class="val gold" id="ftAccuracyBoost">+14.85% Alpha</div>
+            <div class="sub">Perplexity: 1.203</div>
+          </div>
+        </div>
+
+        <!-- LORA MODEL ADAPTERS GRID -->
+        <h3 class="section-title"><i data-lucide="cpu"></i> Active Multi-Model LoRA Adaptation Layers</h3>
+        <div class="lora-adapters-grid" id="loraAdaptersGrid">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- ACTION TOOLBAR -->
+        <div class="fine-tuning-actions-bar">
+          <button class="exec-btn buy-btn" onclick="triggerManualFineTune()">
+            <i data-lucide="zap"></i> 1-CLICK TRIGGER ONLINE FINE-TUNING GRADIENT STEP
+          </button>
+          <button class="mode-btn" onclick="exportAdapterWeights()">
+            <i data-lucide="download"></i> EXPORT ACTIVE ADAPTER WEIGHTS (.JSON)
+          </button>
+          <button class="mode-btn" onclick="generateSyntheticDataset()">
+            <i data-lucide="database"></i> GENERATE SYNTHETIC RL TRAJECTORIES
+          </button>
+        </div>
+
+        <!-- TWO COLUMN LAYOUT: LOSS HISTORY TABLE & LIVE TUNING LOGS -->
+        <div class="fine-tuning-two-col">
+          <div class="saas-card">
+            <h3><i data-lucide="trending-down"></i> Training Loss & Accuracy Convergence History</h3>
+            <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Epoch</th>
+                    <th>Train Loss</th>
+                    <th>Val Loss</th>
+                    <th>Accuracy (%)</th>
+                    <th>Learning Rate</th>
+                  </tr>
+                </thead>
+                <tbody id="lossHistoryTableBody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="saas-card">
+            <h3><i data-lucide="terminal"></i> Continuous Fine-Tuning & Adapter Event Stream</h3>
+            <div class="tuning-logs-stream" id="tuningLogsStream">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: METATRADER 5 (MT5) INSTITUTIONAL TRADING & FOREX/GOLD RADAR -->
+      <div class="tab-content" id="mt5Tab">
+        <!-- OFFICIAL METATRADER 5 (MT5) HERO PORTAL BANNER -->
+        <div class="mt5-portal-hero">
+          <div class="mt5-hero-left">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="14" height="14" rx="3" fill="#0284c7"/>
+                <rect x="20" y="2" width="14" height="14" rx="3" fill="#ef4444"/>
+                <rect x="2" y="20" width="14" height="14" rx="3" fill="#f59e0b"/>
+                <rect x="20" y="20" width="14" height="14" rx="3" fill="#10b981"/>
+              </svg>
+              <span style="font-size: 1.35rem; font-weight: 900; letter-spacing: 1px; color: #f8fafc;">MetaTrader <span style="color: #38bdf8;">5</span></span>
+              <span class="sub-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">OFFICIAL PLATFORM</span>
+            </div>
+            <h2>
+              The #1 Multi-Asset Platform for <span class="mt5-blue">Forex, Stocks & Futures</span>
+            </h2>
+            <div class="mt5-hero-subtitle">
+              MetaTrader 5 is the institutional gold standard for technical analysis, fundamental analytics, and automated algorithmic trading (Expert Advisors / EAs) across global brokers with sub-millisecond execution.
+            </div>
+
+            <!-- PLATFORM COMPATIBILITY BADGES -->
+            <div class="mt5-platform-pills">
+              <span class="mt5-platform-pill"><i data-lucide="monitor"></i> Windows 11/10 (64-bit)</span>
+              <span class="mt5-platform-pill"><i data-lucide="laptop"></i> macOS (Apple Silicon)</span>
+              <span class="mt5-platform-pill"><i data-lucide="terminal"></i> Linux</span>
+              <span class="mt5-platform-pill" style="border-color: #10b981; color: #10b981;"><i data-lucide="globe"></i> Web Terminal (Active)</span>
+              <span class="mt5-platform-pill"><i data-lucide="smartphone"></i> Android & iOS</span>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="mt5-actions-row">
+              <button class="mt5-btn-primary" onclick="window.open('https://download.mql5.com/cdn/web/metaquotes.ltd/mt5/mt5setup.exe', '_blank')">
+                <i data-lucide="download"></i> Download MT5 Setup (.exe)
+              </button>
+              <button class="mt5-btn-secondary" onclick="toggleDemoAccountModal()">
+                <i data-lucide="user-plus"></i> Open Demo / Real Account
+              </button>
+              <button class="action-button-glow" onclick="triggerMT5AICycle()" style="padding: 0.75rem 1.25rem;">
+                <i data-lucide="zap"></i> ⚡ Run AI Swarm Cycle
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT HERO VISUAL: 4 PILLARS QUICK OVERVIEW -->
+          <div style="background: rgba(10, 15, 25, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1.25rem;">
+            <h4 style="color: #38bdf8; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem;">
+              <i data-lucide="shield-check"></i> Institutional Core Specifications
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.82rem;">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+                <span style="color: #94a3b8;">Order Execution:</span>
+                <strong style="color: #10b981;">6 Order Types + Level 2 DOM</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+                <span style="color: #94a3b8;">Position Accounting:</span>
+                <strong style="color: #38bdf8;">Hedging & Netting Support</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+                <span style="color: #94a3b8;">Technical Indicators:</span>
+                <strong style="color: #f8fafc;">38 Built-in + 44 Graphical Tools</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+                <span style="color: #94a3b8;">Chart Timeframes:</span>
+                <strong style="color: #f59e0b;">21 Timeframes (1M to Monthly)</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+                <span style="color: #94a3b8;">Algorithmic Engine:</span>
+                <strong style="color: #a855f7;">MQL5 C++ Multi-Threaded IDE</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94a3b8;">VPS Low Latency:</span>
+                <strong style="color: #10b981;">&lt; 1 ms Broker Ping Built-in</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 CORE MT5 PLATFORM PILLARS GRID -->
+        <div class="mt5-pillars-grid">
+          <!-- PILLAR 1: FLEXIBLE TRADING SYSTEM -->
+          <div class="mt5-pillar-card">
+            <div>
+              <div class="mt5-pillar-icon"><i data-lucide="sliders"></i></div>
+              <div class="mt5-pillar-title">Flexible Trading System</div>
+              <div class="mt5-pillar-desc">
+                Execute complex trading strategies with netting for exchange markets and hedging for forex trading.
+              </div>
+            </div>
+            <ul class="mt5-pillar-features">
+              <li><i data-lucide="check"></i> 6 pending order types (Buy/Sell Stop Limit)</li>
+              <li><i data-lucide="check"></i> Market Depth (Level 2 DOM Book)</li>
+              <li><i data-lucide="check"></i> 4 execution modes (Instant, Request, Market, Exchange)</li>
+            </ul>
+          </div>
+
+          <!-- PILLAR 2: PROFESSIONAL TECHNICAL ANALYSIS -->
+          <div class="mt5-pillar-card">
+            <div>
+              <div class="mt5-pillar-icon"><i data-lucide="bar-chart-2"></i></div>
+              <div class="mt5-pillar-title">Professional Technical Analysis</div>
+              <div class="mt5-pillar-desc">
+                Open up to 100 charts of currency and stock quotes simultaneously with 21 precise timeframes.
+              </div>
+            </div>
+            <ul class="mt5-pillar-features">
+              <li><i data-lucide="check"></i> 38 built-in technical indicators</li>
+              <li><i data-lucide="check"></i> 44 analytical & Gann/Fibonacci objects</li>
+              <li><i data-lucide="check"></i> Real-time Economic Calendar integration</li>
+            </ul>
+          </div>
+
+          <!-- PILLAR 3: ALGORITHMIC TRADING & MQL5 -->
+          <div class="mt5-pillar-card">
+            <div>
+              <div class="mt5-pillar-icon"><i data-lucide="cpu"></i></div>
+              <div class="mt5-pillar-title">Algorithmic Trading & MQL5</div>
+              <div class="mt5-pillar-desc">
+                Develop, test, and optimize automated trading robots (EAs) with the high-performance MQL5 IDE.
+              </div>
+            </div>
+            <ul class="mt5-pillar-features">
+              <li><i data-lucide="check"></i> Multi-Currency Strategy Tester</li>
+              <li><i data-lucide="check"></i> MQL5 Cloud Network distributed computing</li>
+              <li><i data-lucide="check"></i> C++ speed object-oriented execution</li>
+            </ul>
+          </div>
+
+          <!-- PILLAR 4: SIGNALS, MARKET & VPS -->
+          <div class="mt5-pillar-card">
+            <div>
+              <div class="mt5-pillar-icon"><i data-lucide="server"></i></div>
+              <div class="mt5-pillar-title">Signals, Market & VPS</div>
+              <div class="mt5-pillar-desc">
+                Access thousands of ready-made trading applications in the MQL5 Market and copy successful traders.
+              </div>
+            </div>
+            <ul class="mt5-pillar-features">
+              <li><i data-lucide="check"></i> Thousands of trading robots & indicators</li>
+              <li><i data-lucide="check"></i> Verified Copy Trading signals subscription</li>
+              <li><i data-lucide="check"></i> Ultra-low latency built-in Virtual Hosting</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- UNIVERSAL BROKER & MULTI-ACCOUNT SWITCHER TOOLBAR -->
+        <div class="panel-card" style="margin-bottom: 1rem; background: rgba(13, 17, 23, 0.95); border: 1px solid #1e293b; padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="shield" style="color: #38bdf8; width: 18px; height: 18px;"></i>
+              <span style="font-weight: 700; font-size: 0.85rem; color: #f8fafc;">ACTIVE MT5 ACCOUNT:</span>
+            </div>
+            <select id="mt5AccountSelect" onchange="handleSwitchMT5Account(this.value)" style="background: #0b101b; border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; padding: 0.4rem 0.8rem; border-radius: 6px; font-family: monospace; font-size: 0.82rem; cursor: pointer;">
+              <!-- Populated dynamically by app.js -->
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <button class="action-button-glow" onclick="toggleCustomAccountModal()" style="padding: 0.45rem 1rem; font-size: 0.8rem; background: linear-gradient(135deg, #3b82f6, #8b5cf6);">
+              <i data-lucide="link"></i> 🔗 CONNECT ANY BROKER / DEMO ACCOUNT
+            </button>
+            <button class="action-button-glow" onclick="toggleDemoAccountModal()" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;">
+              <i data-lucide="plus-circle"></i> + 1-CLICK INSTANT DEMO
+            </button>
+            <button class="mode-btn" onclick="triggerMT5AICycle()" style="padding: 0.45rem 0.8rem; font-size: 0.8rem;">
+              <i data-lucide="play"></i> ⚡ RUN AI CYCLE NOW
+            </button>
+          </div>
+        </div>
+
+        <!-- 🔗 UNIVERSAL CUSTOM BROKER & ANY DEMO ACCOUNT CONNECTOR WIZARD (TOGGLEABLE) -->
+        <div id="customAccountConnectorCard" class="panel-card" style="margin-bottom: 1rem; background: rgba(15, 23, 42, 0.98); border: 2px solid #3b82f6; padding: 1.5rem; display: none; box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div>
+              <h3 style="color: #60a5fa; display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; margin-bottom: 0.25rem;">
+                <i data-lucide="link-2"></i> Universal Broker & Any Demo/Live Account Connector
+              </h3>
+              <p style="font-size: 0.78rem; color: #94a3b8; margin: 0;">
+                Connect ANY broker or prop firm account (Exness, IC Markets, FTMO, Funding Pips, Deriv, XM, OctaFX, RoboForex, MetaQuotes, or custom server). All AI Swarm automated trading will execute directly on this account.
+              </p>
+            </div>
+            <button onclick="toggleCustomAccountModal()" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1.4rem;">&times;</button>
+          </div>
+
+          <form onsubmit="handleBindCustomAccount(event)">
+            <!-- Top Preset Quick-Selector -->
+            <div style="margin-bottom: 1rem; background: rgba(0,0,0,0.3); padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #1e293b;">
+              <label style="font-size: 0.78rem; color: #38bdf8; font-weight: 600; display: block; margin-bottom: 0.5rem;">
+                ⚡ Quick-Select Broker Preset (Or Enter Custom Below):
+              </label>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('exness')">Exness Zero</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('ic_markets')">IC Markets Raw</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('ftmo')">FTMO Prop ($100k)</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('funding_pips')">Funding Pips ($100k)</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('the5ers')">The5ers Prop</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('fundednext')">FundedNext</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('pepperstone')">Pepperstone Razor</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('deriv')">Deriv Synthetics</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('metaquotes')">MetaQuotes Demo</button>
+                <button type="button" class="mode-btn" onclick="fillBrokerPreset('custom')">Custom Server</button>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Broker / Prop Firm Name:</label>
+                <input type="text" id="custBrokerName" required placeholder="e.g. Exness Technologies, FTMO, IC Markets" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #f8fafc; padding: 0.5rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem;" />
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">MT5 Server Host / Name:</label>
+                <input type="text" id="custServerName" required placeholder="e.g. Exness-Real14, ICMarketsSC-Demo, FTMO-Demo" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #38bdf8; font-weight: 600; padding: 0.5rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem;" />
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Login / Account Number:</label>
+                <input type="text" id="custLoginNum" required placeholder="e.g. 58920144 or 88921045" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #f59e0b; font-weight: 700; padding: 0.5rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem;" />
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Password / Investor Key:</label>
+                <input type="password" id="custPassword" placeholder="Master or Investor Password" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #f8fafc; padding: 0.5rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem;" />
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Account Type:</label>
+                <select id="custAccountType" onchange="handleAccountTypeChange(this.value)" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #a855f7; font-weight: 600; padding: 0.5rem; border-radius: 6px; font-family: monospace;">
+                  <option value="DEMO">Standard Broker Demo</option>
+                  <option value="PROP_CHALLENGE">Prop Firm Challenge / Evaluation</option>
+                  <option value="PROP_FUNDED">Prop Firm Funded Account</option>
+                  <option value="LIVE_REAL">Live Real Broker Account (ECN/Raw)</option>
+                  <option value="SYNTHETICS">Synthetics / Deriv 24/7</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Account Balance ($ USD):</label>
+                <input type="number" id="custBalance" value="25000" min="100" step="500" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #10b981; font-weight: 700; padding: 0.5rem; border-radius: 6px; font-family: monospace;" />
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Leverage:</label>
+                <select id="custLeverage" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #38bdf8; font-weight: 700; padding: 0.5rem; border-radius: 6px; font-family: monospace;">
+                  <option value="2000">1:2000 (Exness Dynamic Unlimited)</option>
+                  <option value="1000">1:1000 (Ultra High Leverage)</option>
+                  <option value="500" selected>1:500 (Standard Global ECN)</option>
+                  <option value="200">1:200 (Moderate ECN)</option>
+                  <option value="100">1:100 (Standard Prop Firm)</option>
+                  <option value="30">1:30 (FCA / ESMA Retail)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Base Currency:</label>
+                <select id="custCurrency" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #f8fafc; padding: 0.5rem; border-radius: 6px; font-family: monospace;">
+                  <option value="USD" selected>USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="AUD">AUD ($)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Optional Prop Firm Challenge Risk Rules Section -->
+            <div id="propRulesSection" style="margin-bottom: 1.25rem; background: rgba(168, 85, 247, 0.08); border: 1px dashed rgba(168, 85, 247, 0.3); padding: 0.75rem 1rem; border-radius: 6px; display: none;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #c084fc; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+                <i data-lucide="award"></i> Prop Firm Challenge Rule Protection Settings:
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+                <div>
+                  <label style="font-size: 0.72rem; color: #94a3b8; display: block;">Profit Target (%):</label>
+                  <input type="number" id="propTargetPct" value="10" min="1" max="50" step="1" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #10b981; font-weight: 700; padding: 0.35rem 0.6rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;" />
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: #94a3b8; display: block;">Max Daily Drawdown (%):</label>
+                  <input type="number" id="propDailyDdPct" value="5" min="1" max="20" step="0.5" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #ef4444; font-weight: 700; padding: 0.35rem 0.6rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;" />
+                </div>
+                <div>
+                  <label style="font-size: 0.72rem; color: #94a3b8; display: block;">Max Total Drawdown (%):</label>
+                  <input type="number" id="propTotalDdPct" value="10" min="1" max="30" step="0.5" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #f59e0b; font-weight: 700; padding: 0.35rem 0.6rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Ping Test Result Banner -->
+            <div id="pingTestResultBanner" style="display: none; margin-bottom: 1rem; padding: 0.6rem 1rem; border-radius: 6px; font-size: 0.8rem; font-family: monospace;"></div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="mode-btn" onclick="testBrokerLatency()" style="padding: 0.6rem 1.25rem; font-size: 0.82rem;">
+                <i data-lucide="activity"></i> ⚡ TEST PING & HANDSHAKE
+              </button>
+              <button type="submit" class="exec-btn buy-btn" style="padding: 0.65rem 1.75rem; font-size: 0.85rem; height: 38px;">
+                <i data-lucide="check-circle-2"></i> 🚀 CONNECT & BIND ACCOUNT NOW
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- INSTANT DEMO ACCOUNT GENERATOR MODAL / CARD (TOGGLEABLE) -->
+        <div id="demoAccountGeneratorCard" class="panel-card" style="margin-bottom: 1rem; background: rgba(15, 23, 42, 0.95); border: 1px solid #00f0ff; padding: 1.25rem 1.5rem; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="color: #00f0ff; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem;">
+              <i data-lucide="user-plus"></i> Instant Official MT5 Demo Account Provisioning Wizard
+            </h3>
+            <button onclick="toggleDemoAccountModal()" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem;">&times;</button>
+          </div>
+          <form onsubmit="handleCreateDemoAccount(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: flex-end;">
+            <div>
+              <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Select MT5 Broker:</label>
+              <select id="newDemoBrokerSelect" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #f8fafc; padding: 0.5rem; border-radius: 6px; font-family: monospace;">
+                <option value="exness">Exness Technologies (Zero Spread)</option>
+                <option value="ic_markets">IC Markets Global (Raw Spread)</option>
+                <option value="ftmo">FTMO Prop Firm Challenge ($100k-$200k)</option>
+                <option value="funding_pips">Funding Pips Evaluation ($25k-$100k)</option>
+                <option value="the5ers">The 5%ers Bootcamp ($100k)</option>
+                <option value="fundednext">FundedNext Global Challenge</option>
+                <option value="pepperstone">Pepperstone Razor ECN</option>
+                <option value="deriv">Deriv Synthetics & Forex</option>
+                <option value="metaquotes">MetaQuotes Official Direct Server</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Starting Demo Capital ($ USD):</label>
+              <select id="newDemoBalanceSelect" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #10b981; font-weight: 700; padding: 0.5rem; border-radius: 6px; font-family: monospace;">
+                <option value="10000">$10,000 USD (Starter Demo)</option>
+                <option value="25000" selected>$25,000 USD (Standard Prop Fund)</option>
+                <option value="50000">$50,000 USD (Pro Trader Fund)</option>
+                <option value="100000">$100,000 USD (FTMO Prop Challenge)</option>
+                <option value="200000">$200,000 USD (Elite Prop Evaluation)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Account Leverage:</label>
+              <select id="newDemoLeverageSelect" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #a855f7; font-weight: 700; padding: 0.5rem; border-radius: 6px; font-family: monospace;">
+                <option value="2000">1:2000 (Exness Dynamic)</option>
+                <option value="500" selected>1:500 (High Dynamic Leverage)</option>
+                <option value="200">1:200 (Standard ECN Leverage)</option>
+                <option value="100">1:100 (Prop Firm Standard)</option>
+              </select>
+            </div>
+            <button type="submit" class="exec-btn buy-btn" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; height: 38px;">
+              <i data-lucide="zap"></i> PROVISION & LAUNCH DEMO
+            </button>
+          </form>
+        </div>
+
+        <!-- 🏆 PROP FIRM CHALLENGE HEALTH & RULE GUARD HUD (AUTO-DISPLAYED) -->
+        <div id="propChallengeHudCard" class="panel-card" style="margin-bottom: 1rem; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid #a855f7; padding: 1rem 1.5rem; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="award" style="color: #c084fc;"></i>
+              <span style="font-weight: 700; color: #f8fafc; font-size: 0.9rem;">PROP FIRM EVALUATION ENGINE:</span>
+              <span class="badge buy" id="propPhaseBadge">PHASE 1 ACTIVE</span>
+              <span class="badge-dim" id="propStatusBadge" style="color: #10b981; border-color: #10b981;">ON TRACK / PASSING</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8;">
+              Target: <strong id="propTargetAmount" style="color: #10b981;">+$10,000.00 (+10.0%)</strong> • 
+              Max Daily Loss Limit: <strong id="propMaxDailyLimit" style="color: #ef4444;">$5,000.00 (5.0%)</strong>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                <span style="color: #94a3b8;">Profit Target Progress:</span>
+                <span id="propTargetProgressText" style="color: #10b981; font-weight: 700;">68.4% Achieved</span>
+              </div>
+              <div class="confidence-bar-bg" style="height: 8px;">
+                <div class="confidence-fill green" id="propTargetProgressBar" style="width: 68.4%; height: 8px;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                <span style="color: #94a3b8;">Daily Drawdown Used:</span>
+                <span id="propDailyDdText" style="color: #38bdf8; font-weight: 700;">0.45% / 5.0% Max</span>
+              </div>
+              <div class="confidence-bar-bg" style="height: 8px;">
+                <div class="confidence-fill blue" id="propDailyDdBar" style="width: 9%; height: 8px;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
+                <span style="color: #94a3b8;">Total Drawdown Used:</span>
+                <span id="propTotalDdText" style="color: #10b981; font-weight: 700;">0.00% / 10.0% Max</span>
+              </div>
+              <div class="confidence-bar-bg" style="height: 8px;">
+                <div class="confidence-fill green" id="propTotalDdBar" style="width: 0%; height: 8px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MT5 TERMINAL STATUS RIBBON -->
+        <div class="mt5-status-ribbon panel-card" style="margin-bottom: 1rem; background: rgba(10, 15, 25, 0.95); border: 1px solid #1e293b; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="status-indicator" style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="pulse-dot green"></span>
+              <span style="font-weight: 700; color: #10b981; font-size: 0.9rem;" id="mt5ConnStatus">CONNECTED TO MT5</span>
+            </div>
+            <div style="font-size: 0.82rem; color: #94a3b8;">
+              Broker: <span id="mt5BrokerName" style="color: #f8fafc; font-weight: 600;">IC Markets Global (Raw Spread)</span> • 
+              Server: <span id="mt5ServerName" style="color: #38bdf8; font-weight: 600;">ICMarketsSC-Live01</span> • 
+              Login: <code id="mt5LoginNum" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px;">88921045</code>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="font-size: 0.82rem; color: #94a3b8;">
+              Ping: <span id="mt5PingVal" style="color: #10b981; font-weight: 700;">3.8 ms</span> • 
+              Leverage: <span id="mt5LeverageVal" style="color: #a855f7; font-weight: 700;">1:500</span> • 
+              Build: <span id="mt5BuildVal" style="color: #94a3b8;">Build 4153 (x64)</span>
+            </div>
+            <button class="action-button-glow" onclick="fetchMT5Data()" style="padding: 0.35rem 0.8rem; font-size: 0.75rem;">
+              <i data-lucide="refresh-cw"></i> REFRESH MT5
+            </button>
+          </div>
+        </div>
+
+        <!-- MT5 ACCOUNT OVERVIEW METRICS -->
+        <div class="saas-metrics-row">
+          <div class="saas-metric-box">
+            <div class="label">MT5 Account Balance</div>
+            <div class="val highlight" id="mt5BalanceVal">$25,000.00</div>
+            <div class="sub">Currency: USD (Live Account)</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">MT5 Net Equity</div>
+            <div class="val cyan" id="mt5EquityVal">$25,000.00</div>
+            <div class="sub">Free Margin: <span id="mt5FreeMarginVal" style="color:#38bdf8;">$25,000.00</span></div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Floating Unrealized PnL</div>
+            <div class="val green" id="mt5FloatingPnlVal">+$0.00</div>
+            <div class="sub">Margin Level: <span id="mt5MarginLevelVal" style="color:#10b981;">100.0%</span></div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Autonomous MT5 Auto-Pilot</div>
+            <div class="val purple" id="mt5AutoTradeStatus">ENABLED (AI SWARM)</div>
+            <div class="sub">Execution: Institutional Instant</div>
+          </div>
+        </div>
+
+        <!-- TWO COLUMN FAST TRADING INTERFACE & MARKET WATCH -->
+        <div class="whitelabel-management-grid" style="margin-top: 1.5rem;">
+          <!-- LEFT: 1-CLICK INSTANT ORDER EXECUTION -->
+          <div class="saas-card" style="background: rgba(13, 17, 23, 0.9);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3><i data-lucide="zap"></i> 1-Click Institutional MT5 Order Pad</h3>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label style="font-size: 0.78rem; color: #94a3b8;">Auto AI Execution:</label>
+                <input type="checkbox" id="mt5AutoPilotCheck" checked onchange="toggleMT5AutoTrade()" />
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Symbol / Instrument:</label>
+                <select id="mt5SymbolSelect" onchange="updateMT5OrderPadQuote()" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #f8fafc; padding: 0.5rem; border-radius: 6px; font-family: monospace;">
+                  <option value="XAUUSD">XAUUSD - Gold Spot ($/oz)</option>
+                  <option value="EURUSD">EURUSD - Euro / US Dollar</option>
+                  <option value="GBPUSD">GBPUSD - British Pound / USD</option>
+                  <option value="USDJPY">USDJPY - US Dollar / Japanese Yen</option>
+                  <option value="US30">US30 - Wall Street 30 Dow Jones</option>
+                  <option value="NAS100">NAS100 - US Tech 100 Nasdaq</option>
+                  <option value="SPX500">SPX500 - S&P 500 Index</option>
+                  <option value="BTCUSD">BTCUSD - Bitcoin / US Dollar MT5</option>
+                  <option value="ETHUSD">ETHUSD - Ethereum / US Dollar MT5</option>
+                  <option value="GBPJPY">GBPJPY - British Pound / Yen</option>
+                  <option value="AUDUSD">AUDUSD - Australian Dollar / USD</option>
+                  <option value="USDCAD">USDCAD - US Dollar / Canadian Dollar</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.25rem;">Volume (Lots):</label>
+                <input type="number" id="mt5LotInput" value="0.10" step="0.01" min="0.01" max="50.0" style="width: 100%; background: #0b101b; border: 1px solid #1e293b; color: #38bdf8; font-weight: 700; padding: 0.5rem; border-radius: 6px; font-family: monospace;" />
+              </div>
+            </div>
+
+            <!-- QUICK LOT SELECTOR BUTTONS -->
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <button class="mode-btn" onclick="setMT5Lot(0.01)" style="flex: 1; padding: 0.3rem 0.2rem; font-size: 0.75rem;">0.01 L</button>
+              <button class="mode-btn" onclick="setMT5Lot(0.05)" style="flex: 1; padding: 0.3rem 0.2rem; font-size: 0.75rem;">0.05 L</button>
+              <button class="mode-btn active" onclick="setMT5Lot(0.10)" id="btnLot010" style="flex: 1; padding: 0.3rem 0.2rem; font-size: 0.75rem;">0.10 L</button>
+              <button class="mode-btn" onclick="setMT5Lot(0.50)" style="flex: 1; padding: 0.3rem 0.2rem; font-size: 0.75rem;">0.50 L</button>
+              <button class="mode-btn" onclick="setMT5Lot(1.00)" style="flex: 1; padding: 0.3rem 0.2rem; font-size: 0.75rem;">1.00 L</button>
+              <button class="mode-btn" onclick="setMT5Lot(5.00)" style="flex: 1; padding: 0.3rem 0.2rem; font-size: 0.75rem;">5.00 L</button>
+            </div>
+
+            <!-- SL / TP PIPS INPUTS -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+              <div>
+                <label style="font-size: 0.78rem; color: #ef4444; display: block; margin-bottom: 0.25rem;">Stop Loss (Pips):</label>
+                <input type="number" id="mt5SlPipsInput" value="30" min="0" step="5" style="width: 100%; background: #0b101b; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 0.5rem; border-radius: 6px; font-family: monospace;" />
+              </div>
+              <div>
+                <label style="font-size: 0.78rem; color: #10b981; display: block; margin-bottom: 0.25rem;">Take Profit (Pips):</label>
+                <input type="number" id="mt5TpPipsInput" value="90" min="0" step="5" style="width: 100%; background: #0b101b; border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 0.5rem; border-radius: 6px; font-family: monospace;" />
+              </div>
+            </div>
+
+            <!-- LIVE BID/ASK PRICE BOX -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #1e293b; margin-bottom: 1rem;">
+              <div>
+                <div style="font-size: 0.72rem; color: #94a3b8;">BID PRICE (SELL)</div>
+                <div id="mt5OrderPadBid" style="font-size: 1.25rem; font-weight: 700; color: #ef4444; font-family: monospace;">2894.50</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 0.72rem; color: #94a3b8;">SPREAD</div>
+                <div id="mt5OrderPadSpread" style="font-size: 0.9rem; font-weight: 700; color: #f59e0b;">1.2 Pips</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 0.72rem; color: #94a3b8;">ASK PRICE (BUY)</div>
+                <div id="mt5OrderPadAsk" style="font-size: 1.25rem; font-weight: 700; color: #10b981; font-family: monospace;">2894.62</div>
+              </div>
+            </div>
+
+            <!-- EXECUTION BUTTONS -->
+            <div class="exec-buttons-grid">
+              <button class="exec-btn buy-btn" onclick="executeMT5Order('BUY')" style="padding: 0.9rem;">
+                <i data-lucide="arrow-up-circle"></i> BUY / LONG ON MT5
+              </button>
+              <button class="exec-btn sell-btn" onclick="executeMT5Order('SELL')" style="padding: 0.9rem;">
+                <i data-lucide="arrow-down-circle"></i> SELL / SHORT ON MT5
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT: MT5 ACTIVE OPEN POSITIONS & TICKETS -->
+          <div class="saas-card" style="background: rgba(13, 17, 23, 0.9);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <h3><i data-lucide="layers"></i> Live MT5 Open Positions (<span id="mt5OpenCount">0</span>)</h3>
+              <span class="badge buy" id="mt5TotalPosPnl">+$0.00 Floating</span>
+            </div>
+            <div class="table-responsive" style="max-height: 340px; overflow-y: auto;">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Ticket</th>
+                    <th>Symbol</th>
+                    <th>Type</th>
+                    <th>Lots</th>
+                    <th>Open Price</th>
+                    <th>Current</th>
+                    <th>SL / TP</th>
+                    <th>Profit ($)</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="mt5PositionsTableBody">
+                  <tr><td colspan="9" class="empty-msg">No open MT5 tickets. Place an order or enable AI Auto-Pilot.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- MT5 FOREX, GOLD & INDICES MARKET WATCH WITH AI CONSENSUS -->
+        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(13, 17, 23, 0.9);">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i data-lucide="crosshair"></i> MT5 Institutional Market Watch & Swarm Alpha Ratings</h3>
+            <span style="font-size: 0.8rem; color: #94a3b8;">Streaming Live Institutional Spreads & Neural Conviction</span>
+          </div>
+          <div class="table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Category</th>
+                  <th>Bid Price</th>
+                  <th>Ask Price</th>
+                  <th>Spread (Pips)</th>
+                  <th>24h Change</th>
+                  <th>AI Swarm Signal</th>
+                  <th>Confidence</th>
+                  <th>AI Price Target</th>
+                  <th>Consensus Models</th>
+                  <th>Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="mt5MarketWatchTableBody">
+                <tr><td colspan="11" class="empty-msg">Streaming MT5 Forex, Gold, and Indices data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MT5 CLOSED TRADE LEDGER -->
+        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(13, 17, 23, 0.9);">
+          <div class="panel-header">
+            <h3><i data-lucide="history"></i> MT5 Realized Trade Ledger</h3>
+          </div>
+          <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Ticket</th>
+                  <th>Close Time</th>
+                  <th>Symbol</th>
+                  <th>Type</th>
+                  <th>Lots</th>
+                  <th>Open Price</th>
+                  <th>Close Price</th>
+                  <th>Commission</th>
+                  <th>Net Profit ($)</th>
+                  <th>Exit Reason</th>
+                </tr>
+              </thead>
+              <tbody id="mt5HistoryTableBody">
+                <tr><td colspan="10" class="empty-msg">No closed MT5 trades yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 🗂 CONNECTED BROKER & DEMO ACCOUNTS REGISTRY TABLE -->
+        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(13, 17, 23, 0.9);">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="server" style="color: #38bdf8;"></i>
+              <h3 style="margin: 0;">Connected Accounts Registry & Multi-Broker Switcher</h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <button class="action-button-glow" onclick="toggleCustomAccountModal()" style="padding: 0.35rem 0.8rem; font-size: 0.75rem;">
+                <i data-lucide="plus"></i> BIND NEW ACCOUNT
+              </button>
+            </div>
+          </div>
+          <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Broker / Platform</th>
+                  <th>Server</th>
+                  <th>Login ID</th>
+                  <th>Account Type</th>
+                  <th>Leverage</th>
+                  <th>Balance ($)</th>
+                  <th>Equity ($)</th>
+                  <th>Ping Latency</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="mt5ConnectedAccountsTableBody">
+                <tr><td colspan="10" class="empty-msg">Loading connected accounts...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SUPPORTED PREMIER MT5 BROKERS DIRECTORY -->
+        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(13, 17, 23, 0.9);">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i data-lucide="globe"></i> Official MetaTrader 5 Supported Brokers & Prop Firms</h3>
+            <span style="font-size: 0.8rem; color: #94a3b8;">1-Click Institutional Demo Routing</span>
+          </div>
+          <div class="marketplace-grid" id="mt5BrokersGrid" style="margin-top: 1rem;">
+            <!-- Populated dynamically by app.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: REAL-WORLD MARKET DATA & SCRAPER HUB -->
+      <div class="tab-content" id="realDataTab">
+        <!-- REAL DATA PIPELINE STATUS RIBBON -->
+        <div class="panel-card" style="margin-bottom: 1rem; background: rgba(10, 15, 25, 0.95); border: 1px solid #10b981; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div class="status-indicator" style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="pulse-dot green"></span>
+              <span style="font-weight: 700; color: #10b981; font-size: 0.9rem;">100% REAL LIVE MARKET DATA FEEDS CONNECTED</span>
+            </div>
+            <div style="font-size: 0.82rem; color: #94a3b8;">
+              Providers: <span style="color: #f8fafc; font-weight: 600;">Binance Spot/Futures • Coinbase • Kraken • Bybit • Yahoo Finance • Alternative.me</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="font-size: 0.82rem; color: #94a3b8;">
+              Scraped Points: <span id="realDataPointsCount" style="color: #38bdf8; font-weight: 700;">48,530+</span> • 
+              Latency: <span style="color: #10b981; font-weight: 700;">~28 ms</span>
+            </div>
+            <button class="action-button-glow" onclick="triggerRealScrapeNow()" style="padding: 0.45rem 1rem; font-size: 0.8rem;">
+              <i data-lucide="refresh-cw"></i> ⚡ SCRAPE LIVE DATA NOW
+            </button>
+          </div>
+        </div>
+
+        <!-- MACRO OVERVIEW & SENTIMENT METRICS ROW -->
+        <div class="saas-metrics-row">
+          <!-- CARD 1: FEAR & GREED INDEX -->
+          <div class="saas-metric-box" style="border: 1px solid rgba(16, 185, 129, 0.3);">
+            <div class="label"><i data-lucide="compass"></i> Crypto Fear & Greed Index (Live)</div>
+            <div class="val green" id="realFngVal">72 / 100</div>
+            <div class="sub">Classification: <span id="realFngClass" style="color: #10b981; font-weight: 700;">Greed</span> (7D Avg: <span id="realFngAvg">65</span>)</div>
+          </div>
+
+          <!-- CARD 2: REAL BITCOIN PERPETUAL FUNDING RATE -->
+          <div class="saas-metric-box">
+            <div class="label"><i data-lucide="activity"></i> BTC Futures 8h Funding Rate</div>
+            <div class="val cyan" id="realBtcFundingVal">+0.0100%</div>
+            <div class="sub">Annualized: <span id="realBtcFundingAnn" style="color: #38bdf8; font-weight: 700;">+10.95%</span> (Bullish Bias)</div>
+          </div>
+
+          <!-- CARD 3: GOLD & METALS REAL FEED -->
+          <div class="saas-metric-box">
+            <div class="label"><i data-lucide="shield"></i> Gold Spot (XAUUSD) Real Quote</div>
+            <div class="val gold" id="realGoldPriceVal">$2,894.50</div>
+            <div class="sub">Silver (XAGUSD): <span id="realSilverPriceVal" style="color: #e2e8f0; font-weight: 600;">$32.45</span></div>
+          </div>
+
+          <!-- CARD 4: GLOBAL MACRO INDICES -->
+          <div class="saas-metric-box">
+            <div class="label"><i data-lucide="bar-chart-2"></i> US30 / Dow Jones Real Feed</div>
+            <div class="val purple" id="realUs30PriceVal">43,850.0</div>
+            <div class="sub">Nasdaq: <span id="realNas100Val" style="color: #a855f7; font-weight: 600;">19,840.0</span> • WTI: <span id="realWtiVal" style="color: #38bdf8;">$71.85</span></div>
+          </div>
+        </div>
+
+        <!-- 2-COLUMN REAL DATA WORKSPACE -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+          <!-- LEFT: REAL CRYPTO SPOT TICKERS & LIVE SPREADS -->
+          <div class="saas-card" style="background: rgba(13, 17, 23, 0.95); border: 1px solid rgba(56, 189, 248, 0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <h3 style="color: #38bdf8;"><i data-lucide="database"></i> Real Binance Spot Tickers & Orderbooks</h3>
+              <span class="badge buy">Live REST Stream</span>
+            </div>
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Real Price</th>
+                    <th>Bid / Ask</th>
+                    <th>Spread ($)</th>
+                    <th>24h Change</th>
+                    <th>24h Vol (USD)</th>
+                  </tr>
+                </thead>
+                <tbody id="realCryptoTableBody">
+                  <tr><td colspan="6" class="empty-msg">Streaming real Binance market quotes...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- RIGHT: REAL FOREX, GOLD & GLOBAL INDICES (YAHOO FINANCE LIVE FEED) -->
+          <div class="saas-card" style="background: rgba(13, 17, 23, 0.95); border: 1px solid rgba(245, 158, 11, 0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <h3 style="color: #f59e0b;"><i data-lucide="trending-up"></i> Real Forex, Gold & Global Macro Feeds</h3>
+              <span class="badge buy" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border-color: #f59e0b;">Institutional Feed</span>
+            </div>
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Asset Name</th>
+                    <th>Category</th>
+                    <th>Real Price</th>
+                    <th>24h Change</th>
+                    <th>Day Low - High</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody id="realForexTableBody">
+                  <tr><td colspan="6" class="empty-msg">Streaming real Forex & Commodities quotes...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM: PERPETUAL FUTURES FUNDING RATES MATRIX -->
+        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(13, 17, 23, 0.95);">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i data-lucide="zap"></i> Real-Time Perpetual Futures Funding Rates & Leverage Sentiment</h3>
+            <span style="font-size: 0.8rem; color: #94a3b8;">Binance & Bybit Futures Order Flow Grounding</span>
+          </div>
+          <div class="table-responsive">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th>Perpetual Contract</th>
+                  <th>8h Funding Rate</th>
+                  <th>Annualized APR</th>
+                  <th>Mark Price</th>
+                  <th>Index Price</th>
+                  <th>Market Leverage Sentiment</th>
+                </tr>
+              </thead>
+              <tbody id="realFundingTableBody">
+                <tr><td colspan="6" class="empty-msg">Streaming perpetual futures funding rates...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- REAL LIVE TRADING GATEWAY & BROKER BRIDGE -->
+        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(13, 17, 23, 0.98); border: 1px solid #ef4444;">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span class="pulse-dot red"></span>
+              <h3 style="color: #ef4444; margin: 0;"><i data-lucide="shield-alert"></i> Real Live Capital Trading Gateway & Broker Bridge</h3>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span style="font-size: 0.82rem; color: #94a3b8;">Active Real Profile:</span>
+              <select id="realAccountSelect" onchange="handleSwitchRealAccount()" style="background: #0f172a; color: #f8fafc; border: 1px solid #ef4444; border-radius: 6px; padding: 0.35rem 0.75rem; font-family: monospace; font-size: 0.85rem;">
+                <!-- Populated dynamically -->
+              </select>
+              <button class="action-button-glow" onclick="toggleRealAccountModal()" style="padding: 0.35rem 0.85rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #f8fafc;">
+                <i data-lucide="plus-circle"></i> Link Real Account
+              </button>
+            </div>
+          </div>
+
+          <!-- REAL LIVE ACCOUNT CONNECTION WIZARD (COLLAPSIBLE) -->
+          <div id="realAccountLinkCard" style="display: none; margin-top: 1.25rem; padding: 1.25rem; background: rgba(15, 23, 42, 0.95); border: 1px dashed #ef4444; border-radius: 8px;">
+            <h4 style="color: #f8fafc; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="link"></i> Authenticate & Connect Real Live Broker / API Key
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+              <div>
+                <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.35rem;">Real Broker / Platform</label>
+                <select id="realLinkBrokerSelect" style="width: 100%; background: #0b0f19; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem;">
+                  <option value="Exness Real Pro (Zero Spread)">Exness Real Pro (Zero Spread MT5)</option>
+                  <option value="IC Markets Global (Raw Spread Live)">IC Markets Global (Raw Spread Live MT5)</option>
+                  <option value="FTMO Funded Stage Live">FTMO Funded Account (Stage 2/Real)</option>
+                  <option value="Pepperstone Razor Live">Pepperstone Razor (NY4 Live MT5)</option>
+                  <option value="Binance Live VIP API">Binance Spot/Futures Live API</option>
+                  <option value="Bybit Real API">Bybit V5 Real API</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.35rem;">Live Server / API Host</label>
+                <input type="text" id="realLinkServerInput" value="Exness-Real14" style="width: 100%; background: #0b0f19; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.35rem;">Account Login / API Key</label>
+                <input type="text" id="realLinkLoginInput" placeholder="e.g. 58920144 or API Key" style="width: 100%; background: #0b0f19; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.35rem;">Password / API Secret</label>
+                <input type="password" id="realLinkPasswordInput" placeholder="••••••••••••" style="width: 100%; background: #0b0f19; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.35rem;">Live Deposit Capital ($ USD)</label>
+                <input type="number" id="realLinkBalanceInput" value="10000" style="width: 100%; background: #0b0f19; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 0.35rem;">Max Risk % Per Trade</label>
+                <select id="realLinkRiskSelect" style="width: 100%; background: #0b0f19; color: #f8fafc; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem;">
+                  <option value="0.5">Conservative (0.5% Risk / Trade)</option>
+                  <option value="1.0" selected>Standard Institutional (1.0% Risk / Trade)</option>
+                  <option value="2.0">Aggressive Growth (2.0% Risk / Trade)</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+              <button class="action-button" onclick="toggleRealAccountModal()" style="padding: 0.45rem 1rem;">Cancel</button>
+              <button class="action-button-glow" onclick="handleConnectRealAccount()" style="padding: 0.45rem 1.25rem; background: #ef4444; border-color: #ef4444;">
+                <i data-lucide="check-circle"></i> Authenticate & Connect Real Account
+              </button>
+            </div>
+          </div>
+
+          <!-- REAL LIVE EXECUTIONS LEDGER -->
+          <div style="margin-top: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <h4 style="font-size: 0.85rem; color: #94a3b8;"><i data-lucide="receipt"></i> Real Live Orders Executed On-Chain & Broker Route</h4>
+              <span id="realOrdersCount" style="font-size: 0.75rem; color: #ef4444; font-family: monospace;">0 Live Orders</span>
+            </div>
+            <div class="table-responsive">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Live Ticket</th>
+                    <th>Timestamp</th>
+                    <th>Broker / Route</th>
+                    <th>Symbol</th>
+                    <th>Side</th>
+                    <th>Volume (Lots)</th>
+                    <th>Executed Price</th>
+                    <th>Commission</th>
+                    <th>Latency</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="realLiveOrdersTableBody">
+                  <tr><td colspan="10" class="empty-msg">Real Live Gateway ready. Connect your live funded account to route real trades.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: WHITE-LABEL & ENTERPRISE SAAS SALES -->
+      <div class="tab-content" id="whiteLabelTab">
+        <!-- SAAS REVENUE OVERVIEW CARDS -->
+        <div class="saas-metrics-row">
+          <div class="saas-metric-box">
+            <div class="label">Total AUM Under Management</div>
+            <div class="val cyan" id="wlTotalAum">$6,050,000.00</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Monthly Recurring Revenue (MRR)</div>
+            <div class="val green" id="wlTotalMrr">$183,398.00</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Annual Run Rate (ARR)</div>
+            <div class="val gold" id="wlTotalArr">$2,200,776.00</div>
+          </div>
+          <div class="saas-metric-box">
+            <div class="label">Global Active Whitelabel Clients</div>
+            <div class="val purple" id="wlTotalClients">172 Traders</div>
+          </div>
+        </div>
+
+        <!-- COMMERCIAL TIERS GRID -->
+        <h3 class="section-title"><i data-lucide="zap"></i> Commercial SaaS Licensing Plans (Ready to Sell)</h3>
+        <div class="commercial-plans-grid" id="commercialPlansGrid">
+          <!-- Populated dynamically by app.js -->
+        </div>
+
+        <!-- WHITE-LABEL TENANT GENERATOR & CLIENT PORTAL -->
+        <div class="whitelabel-management-grid">
+          <div class="saas-card">
+            <h3><i data-lucide="plus-circle"></i> Deploy Instant White-Label Tenant / Prop Firm</h3>
+            <p>Issue a fully branded, turnkey quant trading terminal instance for institutional clients & prop firms.</p>
+            <form id="createTenantForm" onsubmit="handleCreateTenant(event)" class="tenant-form">
+              <div class="form-row">
+                <input type="text" id="tenantBrandName" placeholder="Client Brand Name (e.g. Apex Quant Prop)" required />
+                <input type="text" id="tenantDomain" placeholder="Custom Domain (e.g. portal.apexquant.io)" />
+              </div>
+              <div class="form-row">
+                <input type="email" id="tenantAdminEmail" placeholder="Admin Email (e.g. fund@apexquant.io)" required />
+                <select id="tenantTierSelect">
+                  <option value="Prop Firm White-Label ($2,499/mo)">Prop Firm White-Label ($2,499/mo + 20% Fee)</option>
+                  <option value="Institutional Enterprise ($1,499/mo)">Institutional Enterprise ($1,499/mo)</option>
+                  <option value="Pro Quant Fund ($799/mo)">Pro Quant Fund ($799/mo)</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="color-picker-wrap">
+                  <label>Brand Theme Color:</label>
+                  <input type="color" id="tenantPrimaryColor" value="#00f0ff" />
+                </div>
+                <div class="fee-input-wrap">
+                  <label>Performance Carry Fee (%):</label>
+                  <input type="number" id="tenantCarryFee" value="20.0" step="0.5" min="5" max="50" />
+                </div>
+              </div>
+              <button type="submit" class="exec-btn buy-btn" style="width: 100%; margin-top: 10px;">
+                <i data-lucide="sparkles"></i> 1-CLICK DEPLOY TURNKEY CLIENT TENANT
+              </button>
+            </form>
+          </div>
+
+          <div class="saas-card">
+            <h3><i data-lucide="building"></i> Active White-Label Tenants & Client Directory</h3>
+            <div class="table-responsive">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Brand / Tenant</th>
+                    <th>Custom Domain</th>
+                    <th>Plan Tier</th>
+                    <th>AUM ($)</th>
+                    <th>Monthly Revenue</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tenantsTableBody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 7: INVESTOR ALPHA & PITCH DECK -->
+      <div class="tab-content" id="investorPitchTab">
+        <div class="investor-header-card">
+          <div class="investor-title-row">
+            <div>
+              <h2 id="pitchTitle">OmniTrade Pro — Institutional Alpha Proof & Investor Dossier</h2>
+              <p class="subtitle" id="pitchSummary">Loading institutional audit data...</p>
+            </div>
+            <button class="exec-btn buy-btn" onclick="downloadPitchDossier()">
+              <i data-lucide="download"></i> EXPORT INVESTOR DOSSIER (JSON)
+            </button>
+          </div>
+
+          <div class="pitch-kpi-grid">
+            <div class="pitch-kpi-card">
+              <div class="label">Audited Sharpe Ratio</div>
+              <div class="val green" id="pitchSharpe">3.92</div>
+              <div class="sub">vs Wall St Medallion 4.10</div>
+            </div>
+            <div class="pitch-kpi-card">
+              <div class="label">Sortino Ratio</div>
+              <div class="val cyan" id="pitchSortino">5.41</div>
+              <div class="sub">Downside Risk Adjusted</div>
+            </div>
+            <div class="pitch-kpi-card">
+              <div class="label">Max Historical Drawdown</div>
+              <div class="val gold" id="pitchMaxDd">2.14%</div>
+              <div class="sub">Protected by Smart Trailing Stop</div>
+            </div>
+            <div class="pitch-kpi-card">
+              <div class="label">Internal Hardware Latency</div>
+              <div class="val purple" id="pitchLatency">4.8 ms</div>
+              <div class="sub">RTX A6000 Tensor Cores</div>
+            </div>
+            <div class="pitch-kpi-card">
+              <div class="label">Monte Carlo Win Probability</div>
+              <div class="val green" id="pitchMonteCarlo">99.8%</div>
+              <div class="sub">1,000 Stochastic Iterations</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title"><i data-lucide="trending-up"></i> Institutional Scalability & Annual Profit Models</h3>
+        <div class="scalability-grid" id="scalabilityScenariosGrid">
+          <!-- Populated dynamically by app.js -->
+        </div>
+      </div>
+
+      <!-- TAB 8: SAAS WEBHOOKS & API KEYS -->
+      <div class="tab-content" id="saasTab">
+        <div class="saas-dashboard-grid">
+          <div class="saas-card">
+            <h3><i data-lucide="webhook"></i> TradingView & MT5 Webhook Ingestion</h3>
+            <p>Send instant buy/sell alerts directly from TradingView Pine Script or MT5 into OmniTrade Pro.</p>
+            <div class="webhook-endpoint-box">
+              <code>POST http://localhost:8080/api/webhook/tradingview</code>
+            </div>
+            <pre class="code-snippet">{"ticker": "BTCUSDT", "action": "BUY", "price": 96500, "strategy": "SuperTrend_Alpha"}</pre>
+          </div>
+
+          <div class="saas-card">
+            <h3><i data-lucide="key"></i> API Key Authentication</h3>
+            <p>Connect your custom Python/Node scripts with institutional rate limits.</p>
+            <div class="api-key-item">
+              <span>Master Key: <code>omni_live_master_key_8849</code></span>
+              <span class="badge buy">INSTITUTIONAL TIER</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 16: LINKED AGENTIC AI COUNCIL & GITHUB STRATEGY SKILLS ARSENAL -->
+      <div class="tab-content" id="agenticCouncilTab">
+        <!-- TOP AUTONOMOUS CONTROL RIBBON -->
+        <div style="margin-bottom: 1.5rem; padding: 1.5rem 1.75rem; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid #4f46e5; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+              <span class="badge" style="background: #4f46e5; color: #fff; font-weight: 800; font-size: 0.85rem; padding: 0.3rem 0.75rem; border-radius: 6px;">🤖 6 LINKED AI AGENTS</span>
+              <span class="badge" id="aToZMasterBadge" style="background: #10b981; color: #fff; font-weight: 800; font-size: 0.85rem; padding: 0.3rem 0.75rem; border-radius: 6px;">⚡ 100% A-TO-Z AUTONOMOUS DEALING ACTIVE</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.25rem;">
+              Linked Agentic AI Council & GitHub Skills Arsenal
+            </h2>
+            <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">
+              Interconnected autonomous multi-agent swarm analyzing macro, price action, whale orderbooks, and 15+ ingested GitHub open-source quant strategies.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button class="btn" id="btnToggleAtoZ" onclick="handleToggleAtoZMode()" style="background: #10b981; color: #fff; font-weight: 700; padding: 0.65rem 1.25rem; border-radius: 8px; cursor: pointer; border: none; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="zap"></i> <span id="lblToggleAtoZ">AUTONOMOUS MODE: ON</span>
+            </button>
+            <button class="btn" onclick="handleRunImmediateAtoZCycle()" style="background: #6366f1; color: #fff; font-weight: 700; padding: 0.65rem 1.25rem; border-radius: 8px; cursor: pointer; border: none; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="refresh-cw"></i> RUN AGENTIC DEAL CYCLE NOW
+            </button>
+          </div>
+        </div>
+
+        <!-- 6 LINKED AGENTIC NODES GRID -->
+        <h3 class="section-title" style="color: #818cf8; margin-bottom: 1rem;"><i data-lucide="users"></i> The 6 Connected Autonomous AI Council Agents</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;" id="agenticCouncilGrid">
+          <!-- Populated dynamically by app.js -->
+        </div>
+
+        <!-- A-TO-Z AUTONOMOUS DEAL PIPELINE STAGES -->
+        <div style="background: #111827; border: 1px solid #374151; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+          <h3 style="font-size: 1.15rem; font-weight: 700; color: #f3f4f6; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="git-merge" style="color: #6366f1;"></i> 100% Autonomous A-to-Z Trade Lifecycle Pipeline
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem;" id="aToZStagesGrid">
+            <!-- Populated dynamically by app.js -->
+          </div>
+        </div>
+
+        <!-- TWO COLUMN LAYOUT: LIVE AGENTIC DEBATE STREAM + GITHUB STRATEGY SKILLS ARSENAL -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+          <!-- COLUMN 1: LIVE AGENTIC DELIBERATION STREAM -->
+          <div style="background: #111827; border: 1px solid #374151; border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: #f3f4f6; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="message-square" style="color: #a855f7;"></i> Live Council Deliberations & Directives
+              </h3>
+              <span class="badge" style="background: #374151; color: #9ca3af; font-size: 0.75rem;">REAL-TIME FEED</span>
+            </div>
+            <div style="max-height: 450px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.85rem;" id="agenticDebateStream">
+              <!-- Populated dynamically by app.js -->
+            </div>
+          </div>
+
+          <!-- COLUMN 2: GITHUB & OPEN-SOURCE STRATEGY SKILLS ARSENAL -->
+          <div style="background: #111827; border: 1px solid #374151; border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: #f3f4f6; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="code" style="color: #f59e0b;"></i> Ingested GitHub Trading Bot Skills & Strategies
+              </h3>
+              <span class="badge" style="background: #f59e0b; color: #000; font-weight: 700; font-size: 0.75rem;">12+ QUANT ALGORITHMS</span>
+            </div>
+            <div style="max-height: 450px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.85rem;" id="githubSkillsList">
+              <!-- Populated dynamically by app.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

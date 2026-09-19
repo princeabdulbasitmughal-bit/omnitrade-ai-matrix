@@ -1,0 +1,47 @@
+{
+  "last_updated": "2026-08-21 17:12:33 UTC",
+  "execution_mode": "REAL_LIVE",
+  "risk_settings": {
+    "max_risk_per_trade_pct": 1.0,
+    "max_daily_drawdown_pct": 3.0,
+    "max_open_live_positions": 5,
+    "emergency_kill_switch_active": false,
+    "require_confirmation_for_real_orders": false,
+    "trailing_stop_enabled": true
+  },
+  "active_real_account": {
+    "account_id": "real_exness_pro_01",
+    "broker_name": "Exness Real Pro (Zero Spread)",
+    "platform": "MetaTrader 5 Live",
+    "server": "Exness-Real14",
+    "login": "58920144",
+    "currency": "USD",
+    "balance": 25000.0,
+    "equity": 25000.0,
+    "leverage": 2000,
+    "status": "READY_FOR_EXECUTION",
+    "is_active": true,
+    "created_at": "2026-08-21 21:00:00"
+  },
+  "real_equity": 10000.0,
+  "real_balance": 10000.0,
+  "real_floating_pnl": 0.0,
+  "real_live_orders": [
+    {
+      "ticket": "RL_2231144",
+      "account_id": "real_exness_pro_01",
+      "broker": "Exness Real Pro (Zero Spread)",
+      "server": "Exness-Real14",
+      "symbol": "XAUUSD",
+      "side": "BUY",
+      "volume_lots": 0.2,
+      "open_price": 2894.5,
+      "sl": 2891.0,
+      "tp": 2904.0,
+      "status": "EXECUTED_LIVE",
+      "commission_usd": 0.7,
+      "execution_latency_ms": 18,
+      "timestamp": "2026-08-21 17:10:31 UTC"
+    }
+  ]
+}

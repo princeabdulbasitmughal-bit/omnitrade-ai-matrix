@@ -1,0 +1,44 @@
+[
+  {
+    "account_id": "real_exness_pro_01",
+    "broker_name": "Exness Real Pro (Zero Spread)",
+    "platform": "MetaTrader 5 Live",
+    "server": "Exness-Real14",
+    "login": "58920144",
+    "currency": "USD",
+    "balance": 25000.0,
+    "equity": 25000.0,
+    "leverage": 2000,
+    "status": "READY_FOR_EXECUTION",
+    "is_active": true,
+    "created_at": "2026-08-21 21:00:00"
+  },
+  {
+    "account_id": "real_icmarkets_raw_01",
+    "broker_name": "IC Markets Global (Raw Spread Live)",
+    "platform": "MetaTrader 5 Live",
+    "server": "ICMarketsSC-Live01",
+    "login": "7489102",
+    "currency": "USD",
+    "balance": 50000.0,
+    "equity": 50000.0,
+    "leverage": 500,
+    "status": "READY_FOR_EXECUTION",
+    "is_active": false,
+    "created_at": "2026-08-21 21:00:00"
+  },
+  {
+    "account_id": "real_binance_live_01",
+    "broker_name": "Binance Live VIP API",
+    "platform": "Binance Spot/Futures API",
+    "server": "api.binance.com",
+    "login": "API_KEY_****_8829",
+    "currency": "USDT",
+    "balance": 15000.0,
+    "equity": 15000.0,
+    "leverage": 20,
+    "status": "READY_FOR_EXECUTION",
+    "is_active": false,
+    "created_at": "2026-08-21 21:00:00"
+  }
+]

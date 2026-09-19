@@ -1,0 +1,322 @@
+{
+  "last_updated": "2026-08-21 16:39:26 UTC",
+  "total_data_points_scraped": 48530,
+  "market_cache": {
+    "crypto_tickers": {
+      "BTCUSDT": {
+        "symbol": "BTCUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 77310.37,
+        "bid": 77310.36,
+        "ask": 77310.37,
+        "spread_usd": 0.01,
+        "high_24h": 79500.0,
+        "low_24h": 72330.0,
+        "volume_base": 42719.37234,
+        "volume_quote_usd": 3243880092.0315843,
+        "change_24h_pct": 6.77,
+        "timestamp": "2026-08-21 16:39:05"
+      },
+      "ETHUSDT": {
+        "symbol": "ETHUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 2402.44,
+        "bid": 2402.44,
+        "ask": 2402.45,
+        "spread_usd": 0.01,
+        "high_24h": 2447.98,
+        "low_24h": 2306.67,
+        "volume_base": 651943.5317,
+        "volume_quote_usd": 1545681092.171078,
+        "change_24h_pct": 3.132,
+        "timestamp": "2026-08-21 16:39:05"
+      },
+      "BNBUSDT": {
+        "symbol": "BNBUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 679.46,
+        "bid": 679.45,
+        "ask": 679.46,
+        "spread_usd": 0.01,
+        "high_24h": 686.15,
+        "low_24h": 646.94,
+        "volume_base": 316958.055,
+        "volume_quote_usd": 212268878.4794,
+        "change_24h_pct": 4.362,
+        "timestamp": "2026-08-21 16:39:05"
+      },
+      "ADAUSDT": {
+        "symbol": "ADAUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 0.2194,
+        "bid": 0.2194,
+        "ask": 0.2195,
+        "spread_usd": 0.0001,
+        "high_24h": 0.2211,
+        "low_24h": 0.1933,
+        "volume_base": 325516292.4,
+        "volume_quote_usd": 67997318.45839,
+        "change_24h_pct": 11.032,
+        "timestamp": "2026-08-21 16:39:05"
+      },
+      "XRPUSDT": {
+        "symbol": "XRPUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 1.3986,
+        "bid": 1.3985,
+        "ask": 1.3986,
+        "spread_usd": 0.0001,
+        "high_24h": 1.43,
+        "low_24h": 1.2202,
+        "volume_base": 477936678.2,
+        "volume_quote_usd": 635197108.95667,
+        "change_24h_pct": 9.437,
+        "timestamp": "2026-08-21 16:39:05"
+      },
+      "DOGEUSDT": {
+        "symbol": "DOGEUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 0.08458,
+        "bid": 0.08458,
+        "ask": 0.08459,
+        "spread_usd": 0.0,
+        "high_24h": 0.08577,
+        "low_24h": 0.07908,
+        "volume_base": 1646245213.0,
+        "volume_quote_usd": 136107365.05534,
+        "change_24h_pct": 4.588,
+        "timestamp": "2026-08-21 16:39:05"
+      },
+      "SOLUSDT": {
+        "symbol": "SOLUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 91.56,
+        "bid": 91.55,
+        "ask": 91.56,
+        "spread_usd": 0.01,
+        "high_24h": 93.39,
+        "low_24h": 86.68,
+        "volume_base": 5304340.438,
+        "volume_quote_usd": 477644047.14203,
+        "change_24h_pct": 4.988,
+        "timestamp": "2026-08-21 16:39:05"
+      },
+      "AVAXUSDT": {
+        "symbol": "AVAXUSDT",
+        "source": "Binance Spot Real Feed",
+        "price": 7.635,
+        "bid": 7.634,
+        "ask": 7.635,
+        "spread_usd": 0.001,
+        "high_24h": 7.699,
+        "low_24h": 7.119,
+        "volume_base": 5310682.45,
+        "volume_quote_usd": 39329629.49577,
+        "change_24h_pct": 6.843,
+        "timestamp": "2026-08-21 16:39:05"
+      }
+    },
+    "orderbooks": {},
+    "funding_rates": {
+      "SOLUSDT": {
+        "symbol": "SOLUSDT",
+        "funding_rate_8h_pct": 0.01,
+        "annualized_rate_pct": 10.95,
+        "mark_price": 91.55,
+        "index_price": 91.55100979,
+        "sentiment": "NEUTRAL"
+      },
+      "BNBUSDT": {
+        "symbol": "BNBUSDT",
+        "funding_rate_8h_pct": 0.0189,
+        "annualized_rate_pct": 20.69,
+        "mark_price": 679.69463312,
+        "index_price": 679.26999803,
+        "sentiment": "BULLISH_LEVERAGE"
+      },
+      "BTCUSDT": {
+        "symbol": "BTCUSDT",
+        "funding_rate_8h_pct": 0.01,
+        "annualized_rate_pct": 10.95,
+        "mark_price": 77296.5,
+        "index_price": 77291.44695652,
+        "sentiment": "NEUTRAL"
+      },
+      "ETHUSDT": {
+        "symbol": "ETHUSDT",
+        "funding_rate_8h_pct": 0.01,
+        "annualized_rate_pct": 10.95,
+        "mark_price": 2401.76,
+        "index_price": 2402.11186047,
+        "sentiment": "NEUTRAL"
+      },
+      "XRPUSDT": {
+        "symbol": "XRPUSDT",
+        "funding_rate_8h_pct": 0.01,
+        "annualized_rate_pct": 10.95,
+        "mark_price": 1.3977,
+        "index_price": 1.39821682,
+        "sentiment": "NEUTRAL"
+      }
+    },
+    "forex_and_metals": {
+      "Gold Spot (XAUUSD)": {
+        "symbol": "Gold Spot (XAUUSD)",
+        "yahoo_ticker": "GC=F",
+        "category": "Precious Metals",
+        "price": 4670.9,
+        "change_24h_pct": 2.18,
+        "day_high": 4678.4,
+        "day_low": 4565.5,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:08 UTC"
+      },
+      "Silver Spot (XAGUSD)": {
+        "symbol": "Silver Spot (XAGUSD)",
+        "yahoo_ticker": "SI=F",
+        "category": "Precious Metals",
+        "price": 69.6,
+        "change_24h_pct": 2.2,
+        "day_high": 70.08,
+        "day_low": 67.96,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:09 UTC"
+      },
+      "EUR/USD": {
+        "symbol": "EUR/USD",
+        "yahoo_ticker": "EURUSD=X",
+        "category": "Forex Major",
+        "price": 1.1686,
+        "change_24h_pct": 0.04,
+        "day_high": 1.1715,
+        "day_low": 1.1673,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:09 UTC"
+      },
+      "GBP/USD": {
+        "symbol": "GBP/USD",
+        "yahoo_ticker": "GBPUSD=X",
+        "category": "Forex Major",
+        "price": 1.3643,
+        "change_24h_pct": 0.09,
+        "day_high": 1.3675,
+        "day_low": 1.3619,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:10 UTC"
+      },
+      "USD/JPY": {
+        "symbol": "USD/JPY",
+        "yahoo_ticker": "JPY=X",
+        "category": "Forex Major",
+        "price": 158.939,
+        "change_24h_pct": -0.06,
+        "day_high": 159.134,
+        "day_low": 158.347,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:11 UTC"
+      },
+      "US30 (Dow Jones Industrial)": {
+        "symbol": "US30 (Dow Jones Industrial)",
+        "yahoo_ticker": "^DJI",
+        "category": "Global Indices",
+        "price": 53180.8,
+        "change_24h_pct": 0.8,
+        "day_high": 53256.0,
+        "day_low": 52768.9,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:12 UTC"
+      },
+      "NAS100 (Nasdaq Composite)": {
+        "symbol": "NAS100 (Nasdaq Composite)",
+        "yahoo_ticker": "^IXIC",
+        "category": "Global Indices",
+        "price": 26207.9,
+        "change_24h_pct": 0.54,
+        "day_high": 26269.8,
+        "day_low": 26049.3,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:12 UTC"
+      },
+      "SPX500 (S&P 500 Index)": {
+        "symbol": "SPX500 (S&P 500 Index)",
+        "yahoo_ticker": "^GSPC",
+        "category": "Global Indices",
+        "price": 7682.8,
+        "change_24h_pct": 0.55,
+        "day_high": 7697.1,
+        "day_low": 7660.1,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:13 UTC"
+      },
+      "Crude Oil WTI ($/barrel)": {
+        "symbol": "Crude Oil WTI ($/barrel)",
+        "yahoo_ticker": "CL=F",
+        "category": "Commodities",
+        "price": 86.59,
+        "change_24h_pct": -0.28,
+        "day_high": 87.51,
+        "day_low": 85.8,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:14 UTC"
+      },
+      "US 10-Year Treasury Yield (%)": {
+        "symbol": "US 10-Year Treasury Yield (%)",
+        "yahoo_ticker": "^TNX",
+        "category": "Macro Yields",
+        "price": 4.732,
+        "change_24h_pct": 0.77,
+        "day_high": 4.738,
+        "day_low": 4.692,
+        "source": "Yahoo Finance Real Market Data Feed",
+        "timestamp": "16:39:26 UTC"
+      }
+    },
+    "global_indices": {},
+    "fear_and_greed": {
+      "score": 72,
+      "classification": "Greed",
+      "historical_7d": [
+        72,
+        62,
+        46,
+        41,
+        31,
+        34,
+        34
+      ],
+      "last_updated": "2026-08-21 16:39:07 UTC"
+    },
+    "source_health": {
+      "binance": {
+        "status": "LIVE",
+        "ping_ms": 12493,
+        "last_updated": "16:39:05"
+      },
+      "coinbase": {
+        "status": "LIVE",
+        "ping_ms": 35,
+        "last_updated": ""
+      },
+      "kraken": {
+        "status": "LIVE",
+        "ping_ms": 42,
+        "last_updated": ""
+      },
+      "bybit": {
+        "status": "LIVE",
+        "ping_ms": 31,
+        "last_updated": ""
+      },
+      "yahoo_finance": {
+        "status": "LIVE",
+        "ping_ms": 48,
+        "last_updated": "16:39:26"
+      },
+      "fear_greed_api": {
+        "status": "LIVE",
+        "ping_ms": 759,
+        "last_updated": "16:39:07"
+      }
+    }
+  }
+}
