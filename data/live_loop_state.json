@@ -1,47 +1,47 @@
 {
-  "cycle": 119,
-  "timestamp": "2026-09-19 22:00:13",
+  "cycle": 122,
+  "timestamp": "2026-09-19 22:04:35",
   "server_status": "ONLINE",
   "cloudflare_url": "https://ocean-identify-ottawa-perform.trycloudflare.com",
   "health_score_pct": 100.0,
   "passed_agents": 20,
   "total_agents": 20,
-  "swarm_latency_ms": 35634.44,
+  "swarm_latency_ms": 25027.0,
   "squadrons": {
     "market_intelligence": [
       {
         "agent_id": 1,
         "name": "SubAgent-01-MarketData",
         "status": "PASS",
-        "latency_ms": 10028.83,
-        "details": "BTC/USDT: $98,099.17 | 24h Change: +1.54%"
+        "latency_ms": 10031.76,
+        "details": "BTC/USDT: $93,951.10 | 24h Change: -2.88%"
       },
       {
         "agent_id": 2,
         "name": "SubAgent-02-SuperTrend",
         "status": "PASS",
-        "latency_ms": 10078.57,
-        "details": "SuperTrend: BEARISH | ATR: 1241.83"
+        "latency_ms": 10366.63,
+        "details": "SuperTrend: BEARISH | ATR: 1143.14"
       },
       {
         "agent_id": 3,
         "name": "SubAgent-03-RSI-Oscillators",
         "status": "PASS",
-        "latency_ms": 10285.77,
-        "details": "ETH RSI(14): 28.27 (OVERSOLD)"
+        "latency_ms": 10241.61,
+        "details": "ETH RSI(14): 51.07 (NEUTRAL)"
       },
       {
         "agent_id": 4,
         "name": "SubAgent-04-ML-DirectionClassifier",
         "status": "PASS",
-        "latency_ms": 10611.01,
-        "details": "ML Prediction: STRONG_BEARISH | Confidence: 72.4%"
+        "latency_ms": 10830.16,
+        "details": "ML Prediction: STRONG_BULLISH | Confidence: 74.4%"
       },
       {
         "agent_id": 5,
         "name": "SubAgent-05-AI-Consensus",
         "status": "PASS",
-        "latency_ms": 35618.95,
+        "latency_ms": 25015.44,
         "details": "Quorum Signal: HOLD | Confidence: 56.5% | 4 Swarm Models"
       }
     ],
@@ -50,7 +50,7 @@
         "agent_id": 6,
         "name": "SubAgent-06-DeepSeek-Quant",
         "status": "PASS",
-        "latency_ms": 1.14,
+        "latency_ms": 0.58,
         "details": "Quant Ruleset Active: True (8945 bytes)"
       },
       {
@@ -64,15 +64,15 @@
         "agent_id": 8,
         "name": "SubAgent-08-PPO-Agent",
         "status": "PASS",
-        "latency_ms": 67.72,
+        "latency_ms": 0.57,
         "details": "PPO Action: 0 (0=HOLD, 1=BUY, 2=SELL) | Policy: Continuous Neural Net"
       },
       {
         "agent_id": 9,
         "name": "SubAgent-09-DQN-Agent",
         "status": "PASS",
-        "latency_ms": 66.2,
-        "details": "DQN Action: 2 | Epsilon: 0.050 | Memory: 0"
+        "latency_ms": 1.03,
+        "details": "DQN Action: 0 | Epsilon: 0.050 | Memory: 0"
       },
       {
         "agent_id": 10,
@@ -87,14 +87,14 @@
         "agent_id": 11,
         "name": "SubAgent-11-MonteCarlo",
         "status": "PASS",
-        "latency_ms": 70.89,
+        "latency_ms": 50.51,
         "details": "Profit Probability: 100.0% | 1,000 Path Simulation Verified"
       },
       {
         "agent_id": 12,
         "name": "SubAgent-12-RiskEngine",
         "status": "PASS",
-        "latency_ms": 0.0,
+        "latency_ms": 15.33,
         "details": "Circuit Breaker: ACTIVE | Pos Size: 0.0237 BTC | Max Risk: 1.5%"
       },
       {
@@ -108,14 +108,14 @@
         "agent_id": 14,
         "name": "SubAgent-14-MT5-Bridge",
         "status": "PASS",
-        "latency_ms": 1.0,
+        "latency_ms": 16.55,
         "details": "MT5 Bridge: SYNCHRONIZED | Symbol: XAUUSD (Gold)"
       },
       {
         "agent_id": 15,
         "name": "SubAgent-15-SmartMoneyTracker",
         "status": "PASS",
-        "latency_ms": 0.0,
+        "latency_ms": 1.02,
         "details": "Direction: NET ACCUMULATION (BULLISH) | Live Whale Alerts: 8 detected"
       }
     ],
@@ -125,7 +125,7 @@
         "name": "SubAgent-16-MultiTenantAuth",
         "status": "PASS",
         "latency_ms": 0.0,
-        "details": "Key: omni_3029fa5... | Validated: True | Role: Enterprise Sovereign"
+        "details": "Key: omni_11039ab... | Validated: True | Role: Enterprise Sovereign"
       },
       {
         "agent_id": 17,
@@ -145,15 +145,15 @@
         "agent_id": 19,
         "name": "SubAgent-19-CloudflareEdge",
         "status": "PASS",
-        "latency_ms": 26.22,
+        "latency_ms": 20.34,
         "details": "Public URL: https://ocean-identify-ottawa-perform.trycloudflare.com | Edge Bridge: HTTP 200"
       },
       {
         "agent_id": 20,
         "name": "SubAgent-20-WatchdogGuard",
         "status": "PASS",
-        "latency_ms": 103.22,
-        "details": "CPU: 14.0% | RAM: 30.8% | Memory Guard: ACTIVE"
+        "latency_ms": 102.94,
+        "details": "CPU: 11.2% | RAM: 30.9% | Memory Guard: ACTIVE"
       }
     ]
   }
