@@ -29,6 +29,8 @@ class MarketDataProvider:
         self._init_exchange()
         self.cache: Dict[str, pd.DataFrame] = {}
         self.exchange_offline = False
+        self.exchange_cooldown_until: float = 0          # Line 32: cooldown timestamp (0 = no cooldown)
+        self.ticker_cache: Dict[str, tuple] = {}         # Line 33: {symbol: (price_dict, timestamp)}
 
     def _init_exchange(self):
         """Initializes ccxt exchange instance with sandbox/public fallbacks."""
@@ -81,7 +83,17 @@ class MarketDataProvider:
         return self._generate_realistic_feed(symbol_upper, limit=limit)
 
     def _fetch_crypto_ccxt(self, symbol: str, timeframe: str, limit: int) -> Optional[pd.DataFrame]:
-        if not self.exchange or self.exchange_offline:
+        if not self.exchange:
+            return None
+        # Smart cooldown: if in cooldown period, skip CCXT and use fallback
+        if self.exchange_cooldown_until and time.time() < self.exchange_cooldown_until:
+            return None
+        # Cooldown expired — reset offline flag and retry
+        if self.exchange_offline and self.exchange_cooldown_until and time.time() >= self.exchange_cooldown_until:
+            logger.info("CCXT cooldown expired — resetting exchange_offline flag, retrying live feed.")
+            self.exchange_offline = False
+            self.exchange_cooldown_until = 0
+        if self.exchange_offline:
             return None
         try:
             ohlcv = self.exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
@@ -90,10 +102,27 @@ class MarketDataProvider:
                 df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
                 for col in ["open", "high", "low", "close", "volume"]:
                     df[col] = df[col].astype(float)
+                # Successful fetch — clear any residual cooldown
+                self.exchange_offline = False
+                self.exchange_cooldown_until = 0
                 return df
         except Exception as e:
-            logger.debug(f"CCXT fetch failed for {symbol}: {e}. Enabling rapid fallback.")
-            self.exchange_offline = True
+            err_str = str(e)
+            if ccxt and isinstance(e, ccxt.RateLimitExceeded):
+                logger.warning(f"CCXT RateLimitExceeded for {symbol}. Cooling down 30s.")
+                self.exchange_offline = True
+                self.exchange_cooldown_until = time.time() + 30
+            elif ccxt and isinstance(e, (ccxt.NetworkError, ccxt.RequestTimeout)):
+                logger.warning(f"CCXT NetworkError for {symbol}. Cooling down 10s.")
+                self.exchange_offline = True
+                self.exchange_cooldown_until = time.time() + 10
+            elif ccxt and isinstance(e, (ccxt.AuthenticationError, ccxt.BadSymbol)):
+                # Non-retryable — log but don't set offline permanently
+                logger.error(f"CCXT Auth/Symbol error for {symbol}: {e}. Skipping CCXT for this call.")
+            else:
+                logger.debug(f"CCXT fetch failed for {symbol}: {e}. Cooling down 15s.")
+                self.exchange_offline = True
+                self.exchange_cooldown_until = time.time() + 15
         return None
 
     def _fetch_yfinance(self, symbol: str, timeframe: str, limit: int) -> Optional[pd.DataFrame]:
@@ -195,22 +224,56 @@ class MarketDataProvider:
         return pd.DataFrame(data)
 
     def get_current_ticker(self, symbol: str) -> Dict[str, Any]:
-        """Fetches the latest real-time ticker price and 24h stats."""
-        df = self.fetch_ohlcv(symbol, timeframe="15m", limit=30)
-        if df.empty:
-            return {"symbol": symbol, "last": 0.0, "change_24h": 0.0, "high_24h": 0.0, "low_24h": 0.0, "volume": 0.0}
+        """Fetches the latest real-time ticker price and 24h stats with 5s TTL cache."""
+        symbol_upper = symbol.upper()
+        now_ts = time.time()
 
-        latest = df.iloc[-1]
-        first = df.iloc[0]
-        pct_change = ((latest["close"] - first["close"]) / first["close"]) * 100
+        # Check TTL cache (5 second TTL for low-latency)
+        cached = self.ticker_cache.get(symbol_upper)
+        if cached and (now_ts - cached[1]) < 5.0:
+            return cached[0]
 
-        return {
-            "symbol": symbol,
-            "last": float(latest["close"]),
-            "open": float(latest["open"]),
-            "high": float(df["high"].max()),
-            "low": float(df["low"].min()),
-            "volume": float(df["volume"].sum()),
-            "change_24h": round(pct_change, 2),
-            "timestamp": latest["timestamp"].isoformat() if hasattr(latest["timestamp"], "isoformat") else str(latest["timestamp"]),
-        }
+        result = None
+
+        # Fast path: use exchange.fetch_ticker() directly (single API call)
+        if self.exchange and not self.exchange_offline:
+            try:
+                t = self.exchange.fetch_ticker(symbol_upper)
+                result = {
+                    "symbol": symbol_upper,
+                    "last": float(t.get("last") or t.get("close") or 0.0),
+                    "open": float(t.get("open") or 0.0),
+                    "high": float(t.get("high") or 0.0),
+                    "low": float(t.get("low") or 0.0),
+                    "volume": float(t.get("baseVolume") or t.get("quoteVolume") or 0.0),
+                    "change_24h": round(float(t.get("percentage") or 0.0), 2),
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "source": "ccxt_live",
+                }
+            except Exception as e:
+                logger.debug(f"fetch_ticker failed for {symbol_upper}: {e}. Falling back to OHLCV.")
+
+        # Fallback: build ticker from OHLCV data
+        if not result:
+            df = self.fetch_ohlcv(symbol_upper, timeframe="15m", limit=30)
+            if df is not None and not df.empty:
+                latest = df.iloc[-1]
+                first = df.iloc[0]
+                pct_change = ((latest["close"] - first["close"]) / first["close"]) * 100 if first["close"] != 0 else 0.0
+                result = {
+                    "symbol": symbol_upper,
+                    "last": float(latest["close"]),
+                    "open": float(latest["open"]),
+                    "high": float(df["high"].max()),
+                    "low": float(df["low"].min()),
+                    "volume": float(df["volume"].sum()),
+                    "change_24h": round(pct_change, 2),
+                    "timestamp": latest["timestamp"].isoformat() if hasattr(latest["timestamp"], "isoformat") else str(latest["timestamp"]),
+                    "source": "ohlcv_fallback",
+                }
+            else:
+                result = {"symbol": symbol_upper, "last": 0.0, "change_24h": 0.0, "high": 0.0, "low": 0.0, "volume": 0.0, "source": "unavailable"}
+
+        # Store in TTL cache
+        self.ticker_cache[symbol_upper] = (result, now_ts)
+        return result

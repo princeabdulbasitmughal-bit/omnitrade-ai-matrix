@@ -581,13 +581,45 @@ def get_risk_stress_test():
         var_metrics = PortfolioStressTester.calculate_var_metrics(equity, pnls)
         stress_scenarios = PortfolioStressTester.simulate_black_swan_scenarios(equity, positions)
 
-        return JSONResponse(content=sanitize_for_json({
-            "portfolio_equity": equity,
-            "value_at_risk": var_metrics,
-            "stress_test_scenarios": stress_scenarios
-        }))
+        return JSONResponse(content=sanitize_for_json({\
+            "portfolio_equity": equity,\
+            "value_at_risk": var_metrics,\
+            "stress_test_scenarios": stress_scenarios\
+        }))\
+    except Exception as e:\
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/risk/reset-circuit-breaker")
+def reset_circuit_breaker():
+    """Manually reset the daily drawdown circuit breaker and restore trading."""
+    try:
+        old_state = risk_engine.is_circuit_broken
+        old_reason = risk_engine.circuit_breaker_reason
+
+        # Reset all circuit breaker flags
+        risk_engine.is_circuit_broken = False
+        risk_engine.circuit_breaker_reason = ""
+        risk_engine.circuit_breaker_timestamp = None
+        risk_engine.soft_circuit_active = False
+
+        # Also reset portfolio daily drawdown tracking
+        if hasattr(portfolio, "daily_pnl"):
+            portfolio.daily_pnl = 0.0
+        if hasattr(portfolio, "daily_drawdown_pct"):
+            portfolio.daily_drawdown_pct = 0.0
+
+        logger.info(f"[MANUAL RESET] Circuit breaker manually cleared by operator. Was: {old_reason}")
+        return JSONResponse(content={
+            "success": True,
+            "message": "Circuit breaker reset. Trading resumed.",
+            "previous_state": {"was_broken": old_state, "reason": old_reason},
+            "current_state": {"is_broken": False, "trading_active": True},
+            "timestamp": __import__("datetime").datetime.utcnow().isoformat()
+        })
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 @app.get("/api/arbitrage/live")
 def get_live_arbitrage():
