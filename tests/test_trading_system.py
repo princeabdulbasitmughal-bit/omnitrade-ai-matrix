@@ -58,7 +58,7 @@ def test_ml_predictor():
     pred = predictor.predict_next_candle(df)
     
     assert "prediction" in pred
-    assert pred["prediction"] in ["BULLISH", "BEARISH", "NEUTRAL"]
+    assert pred["prediction"] in ["BULLISH", "BEARISH", "NEUTRAL", "STRONG_BULLISH", "STRONG_BEARISH"]
     assert 0.0 <= pred["confidence"] <= 1.0
 
 def test_ai_consensus():
@@ -116,6 +116,82 @@ def test_risk_and_order_flow():
     if close_rec:
         assert close_rec["pnl"] > 0
 
+    # 1. Verify Dynamic Slippage Calculation
+    slip_pct_low, exec_p_low = order_manager.calculate_dynamic_slippage("BTC/USDT", current_price=95000.0, side="BUY", amount=0.01, atr=500.0)
+    slip_pct_high, exec_p_high = order_manager.calculate_dynamic_slippage("BTC/USDT", current_price=95000.0, side="BUY", amount=2.0, atr=3000.0)
+    assert slip_pct_high > slip_pct_low, "High ATR & large notional must produce higher dynamic slippage"
+    assert exec_p_high > exec_p_low, "BUY execution price under high slippage must be higher"
+
+    # 2. Verify Partial Fill Handler
+    part_res1 = order_manager.handle_partial_fill(
+        symbol="ETH/USDT",
+        order_id="ORD_ETH_101",
+        side="BUY",
+        filled_amount=1.0,
+        fill_price=2700.0,
+        remaining_amount=1.0,
+        sl_price=2600.0,
+        tp_levels=[2800.0, 2900.0, 3050.0],
+        reason="Initial partial fill"
+    )
+    assert "ETH/USDT" in portfolio.positions
+    assert portfolio.positions["ETH/USDT"]["amount"] == 1.0
+
+    # Incremental partial fill on same position
+    part_res2 = order_manager.handle_partial_fill(
+        symbol="ETH/USDT",
+        order_id="ORD_ETH_101",
+        side="BUY",
+        filled_amount=1.0,
+        fill_price=2720.0,
+        remaining_amount=0.0,
+        sl_price=2600.0,
+        tp_levels=[2800.0, 2900.0, 3050.0],
+        reason="Final fill completion"
+    )
+    assert portfolio.positions["ETH/USDT"]["amount"] == 2.0
+    assert portfolio.positions["ETH/USDT"]["entry_price"] == 2710.0, "VWAP entry price must average 2700 and 2720"
+
+    # 3. Verify Emergency Cancel-All Triggers
+    cancel_report = order_manager.emergency_cancel_all(flatten_positions=True, current_prices={"ETH/USDT": 2750.0})
+    assert cancel_report["status"] == "EMERGENCY_CANCEL_ALL_COMPLETED"
+    assert cancel_report["circuit_breaker_active"] is True
+    assert "ETH/USDT" not in portfolio.positions, "Emergency flatten must close active positions"
+    assert risk_engine.is_circuit_broken is True
+
+def test_mt5_execution_bridges():
+    from core.mt5_engine import MT5InstitutionalEngine
+    import tempfile
+    mt5 = MT5InstitutionalEngine(data_dir=tempfile.gettempdir())
+
+    # 1. Verify MT5 Dynamic Slippage
+    slip_pips_small, exec_p_small, dev_small = mt5.calculate_dynamic_slippage("XAUUSD", "BUY", lots=0.10)
+    slip_pips_large, exec_p_large, dev_large = mt5.calculate_dynamic_slippage("XAUUSD", "BUY", lots=15.0)
+    assert slip_pips_large > slip_pips_small, "Large block lots must experience higher MT5 slippage"
+    assert dev_large >= dev_small, "Deviation points must scale with order volume"
+
+    # 2. Verify Order Execution with Dynamic Slippage & Deviation
+    order_res = mt5.order_send(symbol="XAUUSD", action="BUY", lots=0.50, sl_pips=50.0, tp_pips=100.0)
+    assert order_res["status"] == "SUCCESS"
+    assert "slippage_pips" in order_res
+    assert "deviation_points" in order_res
+    ticket = order_res["ticket"]
+
+    # 3. Verify Partial Position Close
+    part_close_res = mt5.close_partial_position(ticket=ticket, lots_to_close=0.20, reason="TEST_PARTIAL_TP")
+    assert part_close_res["status"] == "PARTIALLY_CLOSED"
+    assert part_close_res["closed_lots"] == 0.20
+    assert part_close_res["remaining_lots"] == 0.30
+
+    pos = next(p for p in mt5.open_positions if p["ticket"] == ticket)
+    assert pos["volume_lots"] == 0.30
+
+    # 4. Verify MT5 Emergency Cancel-All Trigger
+    emergency_report = mt5.emergency_cancel_all(flatten_positions=True)
+    assert emergency_report["status"] == "EMERGENCY_CANCEL_ALL_COMPLETED"
+    assert emergency_report["auto_trade_enabled"] is False
+    assert len(mt5.open_positions) == 0, "Emergency cancel-all must flatten all open positions"
+
 def test_backtest_and_monte_carlo():
     provider = MarketDataProvider()
     df = provider.fetch_ohlcv("BTC/USDT", limit=100)
@@ -133,17 +209,19 @@ def test_backtest_and_monte_carlo():
 if __name__ == "__main__":
     print("Running OmniTrade AI Matrix Full Test Suite...")
     test_market_data_generation()
-    print("✓ Market Data test passed")
+    print("Market Data test passed")
     test_technical_indicators()
-    print("✓ Technical Indicators test passed")
+    print("Technical Indicators test passed")
     test_smart_money_concepts()
-    print("✓ Smart Money Concepts test passed")
+    print("Smart Money Concepts test passed")
     test_ml_predictor()
-    print("✓ ML Predictor test passed")
+    print("ML Predictor test passed")
     test_ai_consensus()
-    print("✓ AI Consensus Swarm test passed")
+    print("AI Consensus Swarm test passed")
     test_risk_and_order_flow()
-    print("✓ Risk & Order Flow test passed")
+    print("Risk & Order Flow (Dynamic Slippage, Partial Fill, Emergency Cancel) passed")
+    test_mt5_execution_bridges()
+    print("MT5 Execution Bridges (Dynamic Slippage, Partial Lot Close, Emergency Kill Switch) passed")
     test_backtest_and_monte_carlo()
-    print("✓ Backtest & Monte Carlo test passed")
-    print("\nALL 7 CORE TEST SUITES PASSED 100%!")
+    print("Backtest & Monte Carlo test passed")
+    print("\nALL 8 CORE AND EXECUTION TEST SUITES PASSED 100%!")

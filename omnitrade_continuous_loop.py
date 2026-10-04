@@ -30,6 +30,7 @@ ROOT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT_DIR))
 
 from swarm_20_orchestrator import Swarm20Orchestrator
+from core.atomic_storage import atomic_write_json, atomic_read_json
 
 LOGS_DIR = ROOT_DIR / "logs"
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
@@ -105,23 +106,18 @@ def run_loop_iteration(cycle_num: int, orchestrator: Swarm20Orchestrator):
         "squadrons": swarm_telemetry.get("squadrons", {})
     }
 
-    # 4. Save persistent state
+    # 4. Save persistent state atomically
     try:
-        STATE_FILE.write_text(json.dumps(iteration_record, indent=2), encoding="utf-8")
-        # Append to historical telemetry
-        history = []
-        if TELEMETRY_FILE.exists():
-            try:
-                history = json.loads(TELEMETRY_FILE.read_text(encoding="utf-8"))
-                if not isinstance(history, list):
-                    history = []
-            except Exception:
-                history = []
+        atomic_write_json(STATE_FILE, iteration_record, backup=True)
+        # Append to historical telemetry safely
+        history, _ = atomic_read_json(TELEMETRY_FILE, default=[])
+        if not isinstance(history, list):
+            history = []
         history.append(iteration_record)
         # Keep last 100 cycles to prevent runaway file size
         if len(history) > 100:
             history = history[-100:]
-        TELEMETRY_FILE.write_text(json.dumps(history, indent=2), encoding="utf-8")
+        atomic_write_json(TELEMETRY_FILE, history, backup=True)
     except Exception as e:
         log(f"Error saving telemetry: {e}")
 

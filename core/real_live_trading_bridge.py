@@ -252,6 +252,42 @@ class RealLiveTradingBridge:
             "order": order_receipt
         }
 
+    def trigger_emergency_kill_switch(self, flatten_positions: bool = True) -> Dict[str, Any]:
+        """
+        Activates emergency kill switch on live bridge:
+        - Locks risk settings to reject all subsequent real live orders
+        - Triggers MT5 emergency cancel-all and position flattening
+        """
+        self.risk_settings["emergency_kill_switch_active"] = True
+        logger.warning(f"REAL LIVE BRIDGE EMERGENCY KILL-SWITCH ACTIVATED! (Flatten: {flatten_positions})")
+
+        from core.mt5_engine import mt5_engine
+        mt5_report = mt5_engine.emergency_cancel_all(flatten_positions=flatten_positions)
+
+        self._save_state()
+        return {
+            "status": "KILL_SWITCH_ENGAGED",
+            "emergency_kill_switch_active": True,
+            "flatten_positions": flatten_positions,
+            "mt5_emergency_report": mt5_report,
+            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        }
+
+    def handle_partial_fill(self, ticket: str, filled_lots: float, remaining_lots: float, fill_price: float) -> Dict[str, Any]:
+        """
+        Updates live order receipt with partial fill information.
+        """
+        target_order = next((o for o in self.real_live_orders if o.get("ticket") == ticket), None)
+        if target_order:
+            target_order["status"] = "PARTIALLY_FILLED" if remaining_lots > 0 else "FILLED"
+            target_order["filled_lots"] = filled_lots
+            target_order["remaining_lots"] = remaining_lots
+            target_order["actual_fill_price"] = fill_price
+            self._save_state()
+            logger.info(f"Live Bridge order #{ticket} partial fill registered: {filled_lots}L @ {fill_price} (Remaining: {remaining_lots}L)")
+            return {"status": "SUCCESS", "order": target_order}
+        return {"status": "ERROR", "reason": f"Ticket #{ticket} not found in recent orders"}
+
     def get_summary(self) -> Dict[str, Any]:
         """Returns the complete live bridge status and risk overview."""
         return {

@@ -52,6 +52,8 @@ class Config:
     # Risk Management Parameters
     MAX_RISK_PER_TRADE_PCT = float(os.getenv("MAX_RISK_PER_TRADE_PCT", "1.5"))  # 1.5% max account risk
     MAX_DAILY_DRAWDOWN_PCT = float(os.getenv("MAX_DAILY_DRAWDOWN_PCT", "3.0"))  # 3% circuit breaker
+    MAX_TOTAL_DRAWDOWN_PCT = float(os.getenv("MAX_TOTAL_DRAWDOWN_PCT", "6.0"))  # 6% max cumulative drawdown breaker
+    MAX_CONSECUTIVE_LOSSES = int(os.getenv("MAX_CONSECUTIVE_LOSSES", "4"))      # 4 consecutive losses circuit breaker
     DEFAULT_LEVERAGE = int(os.getenv("DEFAULT_LEVERAGE", "1"))
     MAKER_FEE_PCT = float(os.getenv("MAKER_FEE_PCT", "0.00075")) # 0.075% standard fee
     TAKER_FEE_PCT = float(os.getenv("TAKER_FEE_PCT", "0.00075"))

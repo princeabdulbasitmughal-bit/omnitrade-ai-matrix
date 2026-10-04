@@ -100,7 +100,7 @@ def keepalive_pinger():
 
 def run_tunnel():
     global active_url, current_process
-    cmd = [CLOUDFLARED_PATH, "tunnel", "--url", "http://127.0.0.1:8899", "--no-autoupdate"]
+    cmd = [CLOUDFLARED_PATH, "tunnel", "--url", "http://127.0.0.1:8899", "--edge-ip-version", "4", "--no-autoupdate"]
     log(f"Starting cloudflared tunnel: {' '.join(cmd)}")
     
     current_process = subprocess.Popen(
@@ -146,10 +146,11 @@ def run_tunnel():
             })
 
     rc = current_process.wait()
-    log(f"Cloudflared process exited with returncode {rc}. Re-spawning in 2 seconds...")
+    retry_delay = 2 if url_found else 6
+    log(f"Cloudflared process exited with returncode {rc}. Re-spawning in {retry_delay} seconds...")
     active_url = None
     current_process = None
-    time.sleep(2)
+    time.sleep(retry_delay)
 
 def main():
     log("OmniTrade Cloudflare Tunnel Watchdog Started.")

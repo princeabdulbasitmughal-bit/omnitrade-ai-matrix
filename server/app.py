@@ -8,7 +8,7 @@ START_TIME = time.time()
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Set, Union, Tuple
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
@@ -132,28 +132,34 @@ def prewarm_cache():
         except Exception as e:
             logger.error(f"Error pre-warming {symbol}: {e}")
 
-# WebSocket Connection Manager
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
+from omnitrade.api import (
+    ws_manager,
+    WebSocketManager,
+    router as stream_router,
+    MsgType,
+    serialize_frame
+)
+ConnectionManager = WebSocketManager
 
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
+def get_initial_terminal_state() -> Dict[str, Any]:
+    """Provides instant initial terminal state snapshot for new WebSocket clients."""
+    return {
+        "portfolio": live_reality.get_portfolio(),
+        "mt5": live_reality.get_mt5_account(),
+        "real_data": live_reality.get_real_data_summary(),
+        "live_gateway": live_reality.get_live_gateway(),
+        "evolution": evolution_engine.get_summary(),
+        "status": {
+            "status": "ONLINE",
+            "system": "OmniTrade Pro Institutional SaaS v3.0",
+            "trading_mode": order_manager.mode,
+            "auto_trade": orchestrator.auto_trade_enabled
+        },
+        "scanned_assets": list(live_market_cache.values()),
+        "voice_script": latest_voice_script
+    }
 
-    def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
-
-    async def broadcast(self, message: Dict[str, Any]):
-        cleaned_msg = sanitize_for_json(message)
-        for connection in list(self.active_connections):
-            try:
-                await connection.send_json(cleaned_msg)
-            except Exception:
-                self.disconnect(connection)
-
-ws_manager = ConnectionManager()
+ws_manager.set_init_state_provider(get_initial_terminal_state)
 
 # Background live market scanner task
 async def live_trading_loop():
@@ -249,9 +255,18 @@ async def live_trading_loop():
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("Starting OmniTrade Pro Commercial Live Execution Loop...")
+    logger.info("Starting OmniTrade Pro Commercial Live Execution Loop & High-Speed WebSocket Engine...")
+    await ws_manager.start()
     asyncio.create_task(asyncio.to_thread(prewarm_cache))
     asyncio.create_task(live_trading_loop())
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Shutting down OmniTrade WebSocket Engine...")
+    await ws_manager.stop()
+
+# Mount Stream & Telemetry Router
+app.include_router(stream_router)
 
 # REST API Endpoints
 @app.get("/api/status")
@@ -355,6 +370,24 @@ def close_trade(req: CloseTradeRequest):
     if not record:
         raise HTTPException(status_code=404, detail="No active position found for symbol")
     return JSONResponse(content=sanitize_for_json(record))
+
+class EmergencyCancelRequest(BaseModel):
+    symbol: Optional[str] = None
+    flatten_positions: bool = True
+
+@app.post("/api/execution/emergency_cancel_all")
+def emergency_cancel_all(req: EmergencyCancelRequest = Body(...)):
+    try:
+        # Collect current prices for flattening
+        current_prices = {s: get_or_create_analysis(s)["ticker"].get("last", 0.0) for s in portfolio.positions.keys()}
+        res = order_manager.emergency_cancel_all(
+            symbol=req.symbol,
+            flatten_positions=req.flatten_positions,
+            current_prices=current_prices
+        )
+        return JSONResponse(content=sanitize_for_json(res))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 class ModeToggleRequest(BaseModel):
     mode: str
@@ -844,6 +877,26 @@ def close_mt5_order(payload: Dict[str, Any] = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/mt5/close_partial")
+def close_partial_mt5_order(payload: Dict[str, Any] = Body(...)):
+    try:
+        ticket = int(payload.get("ticket", 0))
+        lots = float(payload.get("lots", 0.01))
+        reason = payload.get("reason", "PARTIAL_CLOSE_API")
+        res = mt5_engine.close_partial_position(ticket=ticket, lots_to_close=lots, reason=reason)
+        return JSONResponse(content=sanitize_for_json(res))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/mt5/emergency_cancel_all")
+def emergency_cancel_all_mt5(payload: Dict[str, Any] = Body(...)):
+    try:
+        flatten = payload.get("flatten_positions", True)
+        res = mt5_engine.emergency_cancel_all(flatten_positions=flatten)
+        return JSONResponse(content=sanitize_for_json(res))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/mt5/modify")
 def modify_mt5_order(payload: Dict[str, Any] = Body(...)):
     try:
@@ -1129,35 +1182,7 @@ def execute_real_live_order(payload: Dict[str, Any] = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.websocket("/ws/stream")
-async def websocket_endpoint(websocket: WebSocket):
-    await ws_manager.connect(websocket)
-    try:
-        await websocket.send_json(sanitize_for_json({
-            "type": "INIT_STATE",
-            "data": {
-                "portfolio": live_reality.get_portfolio(),
-                "mt5": live_reality.get_mt5_account(),
-                "real_data": live_reality.get_real_data_summary(),
-                "live_gateway": live_reality.get_live_gateway(),
-                "evolution": evolution_engine.get_summary(),
-                "status": {
-                    "status": "ONLINE",
-                    "system": "OmniTrade Pro Institutional SaaS v3.0",
-                    "trading_mode": order_manager.mode,
-                    "auto_trade": orchestrator.auto_trade_enabled
-                },
-                "scanned_assets": list(live_market_cache.values()),
-                "voice_script": latest_voice_script
-            }
-        }))
-        while True:
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        ws_manager.disconnect(websocket)
-    except Exception as e:
-        logger.error(f"WebSocket client error: {e}")
-        ws_manager.disconnect(websocket)
+# High-Speed WebSocket /ws/stream and metrics are handled via stream_router
 
 # Serve Dashboard Frontend
 dashboard_dir = Path(__file__).resolve().parent.parent / "dashboard"

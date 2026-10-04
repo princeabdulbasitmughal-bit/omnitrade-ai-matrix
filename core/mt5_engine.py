@@ -3,7 +3,7 @@ import time
 import os
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 logger = logging.getLogger("OmniTrade.MT5Engine")
 
@@ -197,6 +197,40 @@ class MT5InstitutionalEngine:
             })
         return watch
 
+    def calculate_dynamic_slippage(self, symbol: str, action: str, lots: float) -> Tuple[float, float, int]:
+        """
+        Calculates dynamic execution slippage for MT5:
+        - Base spread consideration
+        - Lot size liquidity tier (micro vs standard vs institutional block)
+        - Returns (slippage_pips, executed_price, deviation_points)
+        """
+        spec = self.symbols_specs.get(symbol, {"digits": 2, "pip_size": 0.01, "spread_pips": 1.0, "point": 0.01})
+        quote = self.live_prices.get(symbol, {"bid": 1.0, "ask": 1.01})
+        pip = spec["pip_size"]
+        point = spec.get("point", pip * 0.1)
+
+        # Baseline spread in pips
+        spread_pips = spec.get("spread_pips", 1.0)
+
+        # Dynamic slippage scaling with lot size
+        if lots > 10.0:
+            slippage_pips = round(spread_pips * 0.45, 1)
+        elif lots > 1.0:
+            slippage_pips = round(spread_pips * 0.25, 1)
+        else:
+            slippage_pips = round(spread_pips * 0.10, 1)
+
+        slippage_pips = max(0.1, slippage_pips)
+        deviation_points = int(round((slippage_pips * pip) / point)) if point > 0 else 20
+
+        raw_price = quote["ask"] if action.upper() == "BUY" else quote["bid"]
+        if action.upper() == "BUY":
+            executed_price = round(raw_price + (slippage_pips * pip), spec["digits"])
+        else:
+            executed_price = round(raw_price - (slippage_pips * pip), spec["digits"])
+
+        return slippage_pips, executed_price, deviation_points
+
     def order_send(
         self,
         symbol: str,
@@ -220,8 +254,10 @@ class MT5InstitutionalEngine:
         })
 
         action = action.upper()
-        entry_price = quote["ask"] if action == "BUY" else quote["bid"]
         pip = spec["pip_size"]
+
+        # Calculate institutional dynamic slippage and MT5 deviation points
+        slippage_pips, entry_price, deviation_points = self.calculate_dynamic_slippage(sym_clean, action, lots)
 
         if sl_pips is not None and sl is None:
             sl = entry_price - (sl_pips * pip) if action == "BUY" else entry_price + (sl_pips * pip)
@@ -261,6 +297,8 @@ class MT5InstitutionalEngine:
             "swap": 0.00,
             "commission": round(lots * -3.50, 2),
             "margin_required": margin_required,
+            "slippage_pips": slippage_pips,
+            "deviation_points": deviation_points,
             "comment": comment,
             "magic": magic,
             "open_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -270,7 +308,7 @@ class MT5InstitutionalEngine:
         self._recalculate_positions_pnl()
         self._save_state()
 
-        logger.info(f"MT5 Order Executed: #{ticket} | {action} {lots} Lots {sym_clean} @ {entry_price} | SL: {sl} | TP: {tp}")
+        logger.info(f"MT5 Order Executed: #{ticket} | {action} {lots} Lots {sym_clean} @ {entry_price} (Slippage: {slippage_pips} pips, Dev: {deviation_points} pts) | SL: {sl} | TP: {tp}")
 
         return {
             "status": "SUCCESS",
@@ -279,6 +317,8 @@ class MT5InstitutionalEngine:
             "action": action,
             "volume_lots": lots,
             "open_price": entry_price,
+            "slippage_pips": slippage_pips,
+            "deviation_points": deviation_points,
             "sl": sl,
             "tp": tp,
             "margin_required": margin_required,
@@ -332,6 +372,130 @@ class MT5InstitutionalEngine:
             "close_price": close_price,
             "net_profit_usd": net_profit,
             "retcode": 10009
+        }
+
+    def close_partial_position(self, ticket: int, lots_to_close: float, reason: str = "PARTIAL_CLOSE") -> Dict[str, Any]:
+        """
+        Closes a partial fraction of an open MT5 position.
+        Recalculates proportional margin, realized PnL, and updates active position volume.
+        """
+        pos = next((p for p in self.open_positions if p["ticket"] == ticket), None)
+        if not pos:
+            return {"status": "ERROR", "reason": f"Position ticket #{ticket} not found."}
+
+        current_lots = pos["volume_lots"]
+        lots_to_close = round(lots_to_close, 2)
+        if lots_to_close <= 0:
+            return {"status": "ERROR", "reason": "Lots to close must be > 0"}
+
+        if lots_to_close >= current_lots:
+            return self.close_position(ticket, reason=reason)
+
+        sym = pos["symbol"]
+        spec = self.symbols_specs.get(sym, {"digits": 2, "pip_size": 0.01})
+        quote = self.live_prices.get(sym, {"bid": pos["current_price"], "ask": pos["current_price"]})
+        close_price = quote["bid"] if pos["type"] == "BUY" else quote["ask"]
+
+        # Proportional profit calculation
+        ratio = lots_to_close / current_lots
+        partial_pnl = round(pos["profit_usd"] * ratio, 2)
+        partial_comm = round(pos.get("commission", 0.0) * ratio, 2)
+        partial_swap = round(pos.get("swap", 0.0) * ratio, 2)
+        net_profit = round(partial_pnl + partial_comm + partial_swap, 2)
+
+        # Update account balances
+        self.account_info["balance"] = round(self.account_info["balance"] + net_profit, 2)
+        self.account_info["equity"] = self.account_info["balance"]
+
+        # Update remaining position
+        pos["volume_lots"] = round(current_lots - lots_to_close, 2)
+        pos["commission"] = round(pos.get("commission", 0.0) - partial_comm, 2)
+        pos["swap"] = round(pos.get("swap", 0.0) - partial_swap, 2)
+        pos["margin_required"] = round(pos.get("margin_required", 0.0) * (1.0 - ratio), 2)
+
+        trade_record = {
+            "ticket": f"{ticket}_part_{int(time.time())}",
+            "parent_ticket": ticket,
+            "symbol": sym,
+            "type": pos["type"],
+            "volume_lots": lots_to_close,
+            "remaining_lots": pos["volume_lots"],
+            "open_price": pos["open_price"],
+            "close_price": close_price,
+            "open_time": pos["open_time"],
+            "close_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+            "profit_usd": partial_pnl,
+            "net_profit_usd": net_profit,
+            "profit_pips": pos["profit_pips"],
+            "commission": partial_comm,
+            "reason": reason
+        }
+
+        self.trade_history.insert(0, trade_record)
+        self._recalculate_positions_pnl()
+        self._save_state()
+
+        logger.info(f"MT5 Position Partially Closed: #{ticket} {sym} | Closed {lots_to_close}L (Remaining: {pos['volume_lots']}L) | PnL: ${net_profit:+,.2f} | Reason: {reason}")
+
+        return {
+            "status": "PARTIALLY_CLOSED",
+            "ticket": ticket,
+            "symbol": sym,
+            "closed_lots": lots_to_close,
+            "remaining_lots": pos["volume_lots"],
+            "close_price": close_price,
+            "net_profit_usd": net_profit,
+            "retcode": 10009
+        }
+
+    def emergency_cancel_all(self, flatten_positions: bool = True) -> Dict[str, Any]:
+        """
+        Institutional Emergency Kill Switch for MT5:
+        1. Cancels all working / pending orders on MT5 terminal.
+        2. If flatten_positions=True, immediately closes all open active positions at market.
+        3. Halts autonomous trading (auto_trade_enabled = False).
+        """
+        logger.warning(f"MT5 EMERGENCY CANCEL-ALL INITIATED! (Flatten: {flatten_positions})")
+        cancelled_pending_orders = []
+        flattened_positions = []
+
+        # Cancel pending orders if running on live MT5 terminal
+        if MT5_AVAILABLE and mt5 is not None and self.connected:
+            try:
+                orders = mt5.orders_get()
+                if orders:
+                    for o in orders:
+                        req = {
+                            "action": mt5.TRADE_ACTION_REMOVE,
+                            "order": o.ticket,
+                            "magic": o.magic,
+                            "comment": "EMERGENCY_CANCEL_ALL"
+                        }
+                        res = mt5.order_send(req)
+                        cancelled_pending_orders.append({"ticket": o.ticket, "retcode": res.retcode if res else None})
+            except Exception as e:
+                logger.error(f"Error cancelling live MT5 pending orders: {e}")
+
+        # Flatten all open positions
+        if flatten_positions and self.open_positions:
+            for pos in list(self.open_positions):
+                ticket = pos["ticket"]
+                res = self.close_position(ticket, reason="EMERGENCY_KILL_SWITCH_FLATTEN")
+                flattened_positions.append(res)
+
+        # Halt automated trading
+        self.auto_trade_enabled = False
+        self._save_state()
+
+        logger.info(f"MT5 Emergency Cancel-All Finished. {len(flattened_positions)} positions flattened, auto-trading disabled.")
+        return {
+            "status": "EMERGENCY_CANCEL_ALL_COMPLETED",
+            "auto_trade_enabled": self.auto_trade_enabled,
+            "cancelled_pending_orders_count": len(cancelled_pending_orders),
+            "flattened_positions_count": len(flattened_positions),
+            "cancelled_pending_orders": cancelled_pending_orders,
+            "flattened_positions": flattened_positions,
+            "remaining_open_positions": len(self.open_positions)
         }
 
     def modify_position(self, ticket: int, sl: Optional[float] = None, tp: Optional[float] = None) -> Dict[str, Any]:

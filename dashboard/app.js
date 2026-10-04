@@ -152,6 +152,8 @@ function renderCanvasCandles() {
 }
 
 // 2. Real-time WebSocket connection
+let wsHeartbeatTimer = null;
+
 function initWebSocket() {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const wsUrl = `${protocol}//${window.location.host}/ws/stream`;
@@ -160,21 +162,45 @@ function initWebSocket() {
   const wsText = document.getElementById("wsStatusText");
 
   try {
+    if (wsHeartbeatTimer) {
+      clearInterval(wsHeartbeatTimer);
+      wsHeartbeatTimer = null;
+    }
+
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       if (wsDot) wsDot.className = "status-dot green";
       if (wsText) wsText.innerText = "STREAM: CONNECTED";
+      // Client Heartbeat: Keep-alive ping every 15s to guarantee active connection
+      wsHeartbeatTimer = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "PING", client_ts: Date.now() }));
+        }
+      }, 15000);
     };
 
     ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.type === "MARKET_TICK" || msg.type === "INIT_STATE") {
-        handleMarketTick(msg.data);
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "MARKET_TICK" || msg.type === "INIT_STATE") {
+          handleMarketTick(msg.data);
+        } else if (msg.type === "PONG") {
+          if (msg.data && msg.data.client_ts) {
+            const latencyMs = Math.max(0, Math.round(Date.now() - msg.data.client_ts));
+            if (wsText) wsText.innerText = `STREAM: CONNECTED (${latencyMs}ms)`;
+          }
+        }
+      } catch (err) {
+        console.error("Error parsing WS frame:", err);
       }
     };
 
     ws.onclose = () => {
+      if (wsHeartbeatTimer) {
+        clearInterval(wsHeartbeatTimer);
+        wsHeartbeatTimer = null;
+      }
       if (wsDot) wsDot.className = "status-dot red";
       if (wsText) wsText.innerText = "STREAM: DISCONNECTED (RETRYING)";
       setTimeout(initWebSocket, 2500);

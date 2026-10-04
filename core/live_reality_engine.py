@@ -49,8 +49,9 @@ class LiveRealityEngine:
 
     def _load_state(self):
         try:
-            if self._state_file.exists():
-                s = json.loads(self._state_file.read_text(encoding="utf-8"))
+            from core.atomic_storage import atomic_read_json
+            s, _ = atomic_read_json(self._state_file, default=None, auto_heal_from_backup=True)
+            if s and isinstance(s, dict):
                 self._total_data_points = s.get("total_data_points", 0)
                 self._tick_count = s.get("tick_count", 0)
             else:
@@ -68,12 +69,12 @@ class LiveRealityEngine:
 
     def _save_state(self):
         try:
-            self._state_file.parent.mkdir(parents=True, exist_ok=True)
-            self._state_file.write_text(json.dumps({
+            from core.atomic_storage import atomic_write_json
+            atomic_write_json(self._state_file, {
                 "total_data_points": self._total_data_points,
                 "tick_count": self._tick_count,
                 "last_updated": datetime.now(timezone.utc).isoformat()
-            }), encoding="utf-8")
+            }, backup=True)
         except Exception:
             pass
 

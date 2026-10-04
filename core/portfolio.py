@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from config.settings import Config
+from core.atomic_storage import atomic_write_json, atomic_read_json
 
 logger = logging.getLogger("OmniTrade.Portfolio")
 
@@ -24,21 +25,20 @@ class Portfolio:
         self._load()
 
     def _load(self):
-        if self.storage_path.exists():
-            try:
-                with open(self.storage_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    self.cash = data.get("cash", self.initial_balance)
-                    self.equity = data.get("equity", self.cash)
-                    self.peak_equity = data.get("peak_equity", self.equity)
-                    self.daily_start_equity = data.get("daily_start_equity", self.equity)
-                    self.daily_date = data.get("daily_date", datetime.utcnow().strftime("%Y-%m-%d"))
-                    self.positions = data.get("positions", {})
-                    self.trade_history = data.get("trade_history", [])
-                    self.orders = data.get("orders", [])
-                logger.info(f"Loaded portfolio state. Equity: ${self.equity:.2f}, Cash: ${self.cash:.2f}")
-            except Exception as e:
-                logger.error(f"Error loading portfolio: {e}")
+        data, healed = atomic_read_json(self.storage_path, default=None, auto_heal_from_backup=True)
+        if data is not None and isinstance(data, dict):
+            self.cash = data.get("cash", self.initial_balance)
+            self.equity = data.get("equity", self.cash)
+            self.peak_equity = data.get("peak_equity", self.equity)
+            self.daily_start_equity = data.get("daily_start_equity", self.equity)
+            self.daily_date = data.get("daily_date", datetime.utcnow().strftime("%Y-%m-%d"))
+            self.positions = data.get("positions", {})
+            self.trade_history = data.get("trade_history", [])
+            self.orders = data.get("orders", [])
+            status_tag = " (AUTO-HEALED FROM BACKUP)" if healed else ""
+            logger.info(f"Loaded portfolio state{status_tag}. Equity: ${self.equity:.2f}, Cash: ${self.cash:.2f}")
+        else:
+            logger.info(f"Initialized fresh portfolio state. Equity: ${self.equity:.2f}, Cash: ${self.cash:.2f}")
 
     def save(self):
         try:
@@ -58,8 +58,9 @@ class Portfolio:
                 "orders": self.orders[-100:],
                 "updated_at": datetime.utcnow().isoformat(),
             }
-            with open(self.storage_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
+            success = atomic_write_json(self.storage_path, data, backup=True)
+            if not success:
+                logger.error(f"Failed atomic write to {self.storage_path}")
         except Exception as e:
             logger.error(f"Error saving portfolio: {e}")
 
@@ -141,7 +142,9 @@ class Portfolio:
 
         returned_cash = pos["margin"] + pnl
         self.cash += max(0, returned_cash)
-        self.equity = self.cash + sum(p.get("margin", 0) for p in self.positions.values())
+        self.equity = round(self.cash + sum(p.get("margin", 0) for p in self.positions.values()), 2)
+        if self.equity > self.peak_equity:
+            self.peak_equity = self.equity
 
         trade_record = {
             "id": pos["id"],
@@ -211,9 +214,21 @@ class Portfolio:
 
     def get_summary(self) -> Dict[str, Any]:
         """Calculates performance metrics including win rate, profit factor, max drawdown."""
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+        if today != self.daily_date:
+            self.daily_date = today
+            self.daily_start_equity = self.equity
+
         trades = self.trade_history
         wins = [t for t in trades if t["pnl"] > 0]
         losses = [t for t in trades if t["pnl"] < 0]
+
+        consecutive_losses = 0
+        for t in reversed(trades):
+            if t.get("pnl", 0) < 0:
+                consecutive_losses += 1
+            else:
+                break
 
         total_trades = len(trades)
         win_rate = (len(wins) / total_trades * 100) if total_trades > 0 else 0.0
@@ -239,6 +254,7 @@ class Portfolio:
             "total_trades": total_trades,
             "wins": len(wins),
             "losses": len(losses),
+            "consecutive_losses": consecutive_losses,
             "win_rate": round(win_rate, 2),
             "profit_factor": round(profit_factor, 2),
             "max_drawdown_pct": round(drawdown_pct, 2),
