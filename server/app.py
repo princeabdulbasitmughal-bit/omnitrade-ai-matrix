@@ -9,8 +9,9 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Set, Union, Tuple
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Body, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Body, Request, Depends, Security, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from pydantic import BaseModel
 
@@ -58,13 +59,38 @@ logger = logging.getLogger("OmniTrade.Server")
 
 app = FastAPI(title="OmniTrade Pro Institutional AI Matrix", version="3.0.0")
 
+# CORS: Restrict to localhost — wildcard + credentials is a browser security exploit
+_OMNI_ALLOWED_ORIGINS = [
+    "http://localhost:3000", "http://localhost:3001",
+    "http://localhost:8888", "http://127.0.0.1:8888",
+    "http://localhost:8899", "http://127.0.0.1:8899",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_OMNI_ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-TradingView-Secret"],
 )
+
+# ── Bearer Token Auth ─────────────────────────────────────────────────────────
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+_omni_bearer = HTTPBearer(auto_error=False)
+_OMNI_API_KEY = os.environ.get("OMNITRADE_API_KEY", "")
+_TV_WEBHOOK_SECRET = os.environ.get("TRADINGVIEW_WEBHOOK_SECRET", "")
+
+def require_trade_auth(credentials: Optional[HTTPAuthorizationCredentials] = Security(_omni_bearer)):
+    """Require Bearer token for destructive trade endpoints."""
+    if not _OMNI_API_KEY:
+        return True  # Dev mode — no key configured
+    if not credentials or credentials.credentials != _OMNI_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing API key. Set OMNITRADE_API_KEY env var.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return True
+
 
 def sanitize_for_json(obj: Any) -> Any:
     """Recursively converts all NumPy and Pandas types into standard native JSON-serializable types."""
@@ -343,7 +369,7 @@ class ManualTradeRequest(BaseModel):
     amount: float = 0.0
 
 @app.post("/api/trade/execute")
-def execute_manual_trade(req: ManualTradeRequest):
+def execute_manual_trade(req: ManualTradeRequest, _auth: bool = Depends(require_trade_auth)):
     analysis = get_or_create_analysis(req.symbol)
     price = analysis["ticker"].get("last", 0.0)
     atr = analysis["technical_indicators"].get("atr", price * 0.012)
@@ -581,12 +607,12 @@ def get_risk_stress_test():
         var_metrics = PortfolioStressTester.calculate_var_metrics(equity, pnls)
         stress_scenarios = PortfolioStressTester.simulate_black_swan_scenarios(equity, positions)
 
-        return JSONResponse(content=sanitize_for_json({\
-            "portfolio_equity": equity,\
-            "value_at_risk": var_metrics,\
-            "stress_test_scenarios": stress_scenarios\
-        }))\
-    except Exception as e:\
+        return JSONResponse(content=sanitize_for_json({
+            "portfolio_equity": equity,
+            "value_at_risk": var_metrics,
+            "stress_test_scenarios": stress_scenarios
+        }))
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/risk/reset-circuit-breaker")
@@ -656,7 +682,12 @@ def get_api_keys():
     return JSONResponse(content=sanitize_for_json(auth_mgr.list_keys()))
 
 @app.post("/api/webhook/tradingview")
-def handle_tradingview_webhook(payload: Dict[str, Any] = Body(...)):
+def handle_tradingview_webhook(request: Request, payload: Dict[str, Any] = Body(...)):
+    # Verify webhook secret if configured (prevents public tunnel abuse)
+    if _TV_WEBHOOK_SECRET:
+        incoming_secret = request.headers.get("X-TradingView-Secret", "")
+        if incoming_secret != _TV_WEBHOOK_SECRET:
+            raise HTTPException(status_code=401, detail="Invalid webhook secret.")
     parsed = WebhookManager.process_tradingview_alert(payload)
     analysis = get_or_create_analysis(parsed["symbol"])
     price = parsed["price"] if parsed["price"] > 0 else analysis["ticker"].get("last", 0.0)
