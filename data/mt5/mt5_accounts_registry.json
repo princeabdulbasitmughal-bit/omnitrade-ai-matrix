@@ -85,11 +85,11 @@
       "server": "Exness-Trial2",
       "currency": "USD",
       "leverage": 500,
-      "balance": 24975.25,
-      "equity": 25058.5,
+      "balance": 24991.75,
+      "equity": 24991.75,
       "created_at": "2026-08-21 16:00:00",
       "status": "ACTIVE_CONNECTED",
-      "floating_pnl": 83.25
+      "floating_pnl": 0.0
     }
   ]
 }

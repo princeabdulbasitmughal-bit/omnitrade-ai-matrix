@@ -1,48 +1,48 @@
 {
-  "cycle": 32,
-  "timestamp": "2026-10-10 16:48:56",
+  "cycle": 31,
+  "timestamp": "2026-10-10 16:47:31",
   "server_status": "ONLINE",
   "cloudflare_url": "https://improved-quiz-undo-highest.trycloudflare.com",
   "health_score_pct": 100.0,
   "passed_agents": 20,
   "total_agents": 20,
-  "swarm_latency_ms": 24590.04,
+  "swarm_latency_ms": 36048.02,
   "squadrons": {
     "market_intelligence": [
       {
         "agent_id": 1,
         "name": "SubAgent-01-MarketData",
         "status": "PASS",
-        "latency_ms": 10009.49,
-        "details": "BTC/USDT: $98,099.17 | 24h Change: +1.54%"
+        "latency_ms": 10019.95,
+        "details": "BTC/USDT: $94,823.77 | 24h Change: -1.79%"
       },
       {
         "agent_id": 2,
         "name": "SubAgent-02-SuperTrend",
         "status": "PASS",
-        "latency_ms": 10125.05,
-        "details": "SuperTrend: BULLISH | ATR: 1198.42"
+        "latency_ms": 10029.2,
+        "details": "SuperTrend: BULLISH | ATR: 1274.85"
       },
       {
         "agent_id": 3,
         "name": "SubAgent-03-RSI-Oscillators",
         "status": "PASS",
-        "latency_ms": 10098.92,
-        "details": "ETH RSI(14): 27.67 (OVERSOLD)"
+        "latency_ms": 10083.78,
+        "details": "ETH RSI(14): 28.27 (OVERSOLD)"
       },
       {
         "agent_id": 4,
         "name": "SubAgent-04-ML-DirectionClassifier",
         "status": "PASS",
-        "latency_ms": 10399.01,
-        "details": "ML Prediction: STRONG_BULLISH | Confidence: 77.5%"
+        "latency_ms": 10348.62,
+        "details": "ML Prediction: NEUTRAL | Confidence: 54.2%"
       },
       {
         "agent_id": 5,
         "name": "SubAgent-05-AI-Consensus",
         "status": "PASS",
-        "latency_ms": 24584.88,
-        "details": "Quorum Signal: HOLD | Confidence: 52.0% | 4 Swarm Models"
+        "latency_ms": 36041.61,
+        "details": "Quorum Signal: HOLD | Confidence: 55.2% | 4 Swarm Models"
       }
     ],
     "quant_rl_strategies": [
@@ -50,7 +50,7 @@
         "agent_id": 6,
         "name": "SubAgent-06-DeepSeek-Quant",
         "status": "PASS",
-        "latency_ms": 1.1,
+        "latency_ms": 0.0,
         "details": "Quant Ruleset Active: True (8945 bytes)"
       },
       {
@@ -64,14 +64,14 @@
         "agent_id": 8,
         "name": "SubAgent-08-PPO-Agent",
         "status": "PASS",
-        "latency_ms": 32.02,
+        "latency_ms": 34.11,
         "details": "PPO Action: 0 (0=HOLD, 1=BUY, 2=SELL) | Policy: Continuous Neural Net"
       },
       {
         "agent_id": 9,
         "name": "SubAgent-09-DQN-Agent",
         "status": "PASS",
-        "latency_ms": 31.48,
+        "latency_ms": 34.11,
         "details": "DQN Action: 2 | Epsilon: 0.050 | Memory: 0"
       },
       {
@@ -87,14 +87,14 @@
         "agent_id": 11,
         "name": "SubAgent-11-MonteCarlo",
         "status": "PASS",
-        "latency_ms": 39.71,
+        "latency_ms": 36.47,
         "details": "Profit Probability: 100.0% | 1,000 Path Simulation Verified"
       },
       {
         "agent_id": 12,
         "name": "SubAgent-12-RiskEngine",
         "status": "PASS",
-        "latency_ms": 0.55,
+        "latency_ms": 14.77,
         "details": "Circuit Breaker: ACTIVE | Pos Size: 0.0237 BTC | Max Risk: 1.5%"
       },
       {
@@ -108,7 +108,7 @@
         "agent_id": 14,
         "name": "SubAgent-14-MT5-Bridge",
         "status": "PASS",
-        "latency_ms": 1.62,
+        "latency_ms": 1.78,
         "details": "MT5 Bridge: SYNCHRONIZED | Symbol: XAUUSD (Gold)"
       },
       {
@@ -125,7 +125,7 @@
         "name": "SubAgent-16-MultiTenantAuth",
         "status": "PASS",
         "latency_ms": 0.0,
-        "details": "Key: omni_14030fc... | Validated: True | Role: Enterprise Sovereign"
+        "details": "Key: omni_32e5659... | Validated: True | Role: Enterprise Sovereign"
       },
       {
         "agent_id": 17,
@@ -145,15 +145,15 @@
         "agent_id": 19,
         "name": "SubAgent-19-CloudflareEdge",
         "status": "PASS",
-        "latency_ms": 9.28,
+        "latency_ms": 9.93,
         "details": "Public URL: https://improved-quiz-undo-highest.trycloudflare.com | Edge Bridge: HTTP 200"
       },
       {
         "agent_id": 20,
         "name": "SubAgent-20-WatchdogGuard",
         "status": "PASS",
-        "latency_ms": 102.43,
-        "details": "CPU: 44.2% | RAM: 35.4% | Memory Guard: ACTIVE"
+        "latency_ms": 102.91,
+        "details": "CPU: 50.0% | RAM: 31.3% | Memory Guard: ACTIVE"
       }
     ]
   }
