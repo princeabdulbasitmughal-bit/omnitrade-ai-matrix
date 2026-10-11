@@ -1,9 +1,11 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .pytest_cache/
+*.log
+*.bak
 .coverage
 htmlcov/
 dist/
@@ -15,6 +17,11 @@ build/
 .env.local
 *.key
 *.pem
+*_vault.json
+*_accounts_registry.json
+*credentials*
+data/live_accounts_vault.json
+data/mt5/mt5_accounts_registry.json
 
 # Data and logs
 logs/

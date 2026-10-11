@@ -13,11 +13,14 @@ res = cm.evaluate_market_consensus(
 )
 
 print('=== BASIT2 CONSENSUS ===')
-print('Signal:', res.get('signal'))
-print('Confidence:', f"{res.get('confidence', 0)*100:.1f}%")
-print('Weighted Score:', res.get('weighted_score'))
-for model, vote in res.get('model_votes', {}).items():
-    print(f"  {model}: {vote}")
+print('Final Signal:', res.get('final_signal'))
+print('Aggregate Confidence:', f"{res.get('aggregate_confidence', 0)*100:.1f}%")
+print('Consensus Score:', res.get('consensus_score'))
+print('Threshold Met:', res.get('threshold_met'))
+print('Adaptive Weights:', res.get('adaptive_weights_applied'))
+for agent in res.get('swarm_deliberation', []):
+    name = agent.get('agent') or agent.get('agent_name', 'Agent')
+    print(f"  {name}: {agent.get('signal')} ({agent.get('confidence', 0)*100:.1f}%)")
 
 print('\n=== SCALPER STATUS ===')
 with open(r'E:\scalping-robot-v5\live_status.json', encoding='utf-8') as f:

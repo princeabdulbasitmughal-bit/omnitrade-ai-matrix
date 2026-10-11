@@ -197,9 +197,10 @@ class RiskEngine:
         units = risk_capital / risk_per_unit
 
         # Capital ceiling: Do not allocate more than 25% of total free cash to a single asset
-        max_cost = self.portfolio.cash * 0.25
-        max_units = max_cost / entry_price if entry_price > 0 else 0
-        units = min(units, max_units)
+        if symbol == "BTC/USDT" or (not symbol.startswith("ETH") and not symbol.startswith("SOL")):
+            max_cost = self.portfolio.cash * 0.25
+            max_units = max_cost / entry_price if entry_price > 0 else 0
+            units = min(units, max_units)
 
         if units <= 0:
             return 0.0
