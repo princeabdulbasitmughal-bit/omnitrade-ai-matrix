@@ -80,7 +80,7 @@ class Config:
 
     # Server / Dashboard
     SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
-    SERVER_PORT = int(os.getenv("SERVER_PORT", "8888"))
+    SERVER_PORT = int(os.getenv("SERVER_PORT", "8890"))
 
 # Ensure directories exist
 Config.DATA_DIR.mkdir(parents=True, exist_ok=True)

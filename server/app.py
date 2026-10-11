@@ -63,6 +63,7 @@ app = FastAPI(title="OmniTrade Pro Institutional AI Matrix", version="3.0.0")
 _OMNI_ALLOWED_ORIGINS = [
     "http://localhost:3000", "http://localhost:3001",
     "http://localhost:8888", "http://127.0.0.1:8888",
+    "http://localhost:8890", "http://127.0.0.1:8890",
     "http://localhost:8899", "http://127.0.0.1:8899",
 ]
 app.add_middleware(
@@ -1272,10 +1273,12 @@ def get_health():
             live = json.loads(status_file.read_bytes().decode("utf-8", errors="replace"))
         except Exception:
             pass
+    raw_pos = live.get("open_positions", 0)
+    pos_count = len(raw_pos) if isinstance(raw_pos, (list, dict)) else int(raw_pos)
     return JSONResponse({
         "ok": True,
         "service": "OmniTrade Institutional Pro & MT5 Engine",
-        "port": 8899,
+        "port": Config.SERVER_PORT,
         "uptime_sec": uptime,
         "trader_status": live.get("status", "ACTIVE_SCALPING"),
         "balance": live.get("balance", 10003.7),
@@ -1283,7 +1286,7 @@ def get_health():
         "daily_pnl": live.get("daily_pnl", 3.7),
         "total_trades": live.get("total_trades", 46),
         "win_rate_pct": live.get("win_rate_pct", 80.4),
-        "open_positions": len(live.get("open_positions", [])),
+        "open_positions": pos_count,
         "symbol": live.get("symbol", "XAUUSD"),
         "last_signal": live.get("last_signal", "HOLD"),
         "spread_pips": live.get("spread_pips", 1.8),
