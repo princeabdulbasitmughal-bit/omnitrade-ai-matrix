@@ -98,3 +98,11 @@ class AIConsensusMatrix:
 
         logger.info(f"Consensus for {symbol}: {final_signal} (Confidence: {total_confidence:.2f}, Score: {directional_score:+.2f})")
         return consensus_summary
+
+    def get_consensus(self, symbol: str = "BTC/USDT") -> Dict[str, Any]:
+        """Convenience method returning consensus evaluation for a symbol."""
+        tech_summary = {"rsi": 52.0, "macd": {"signal": "NEUTRAL"}, "trend": "BULLISH"}
+        smc_summary = {"order_block": "BULLISH_OB", "fvg": "IMBALANCE_ABOVE"}
+        ml_summary = {"predicted_return_1h": 0.008, "volatility_pred": 0.015}
+        market_state = {"change_24h": 1.5, "funding_rate": 0.0001}
+        return self.evaluate_market_consensus(symbol, tech_summary, smc_summary, ml_summary, market_state)

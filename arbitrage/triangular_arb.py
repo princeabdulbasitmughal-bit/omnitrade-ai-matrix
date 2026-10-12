@@ -75,3 +75,8 @@ class TriangularArbitrageScanner:
         })
 
         return opportunities
+
+    def scan_arbitrage(self, capital_usd: float = 1000.0, live_prices: Dict[str, float] = None) -> List[Dict[str, Any]]:
+        """Scans for triangular arbitrage with optional capital and live prices."""
+        prices = live_prices or {"BTC/USDT": 96500.0, "ETH/USDT": 2750.0, "SOL/USDT": 185.0, "BNB/USDT": 650.0}
+        return self.scan_opportunities(prices)

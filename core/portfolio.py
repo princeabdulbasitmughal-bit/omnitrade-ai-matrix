@@ -247,6 +247,7 @@ class Portfolio:
 
         return {
             "cash": round(self.cash, 2),
+            "balance": round(self.cash, 2),
             "equity": round(self.equity, 2),
             "initial_balance": round(self.initial_balance, 2),
             "total_pnl": round(total_pnl, 2),

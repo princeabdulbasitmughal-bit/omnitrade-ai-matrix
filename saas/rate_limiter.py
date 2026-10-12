@@ -23,6 +23,27 @@ from starlette.responses import JSONResponse, Response
 logger = logging.getLogger("OmniTrade.RateLimiter")
 
 
+class RateLimiter:
+    """Sliding-window rate limiter for client requests and DoS defense."""
+    def __init__(self, max_requests: int = 10, window_seconds: float = 60.0):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests: Dict[str, List[float]] = {}
+        self.lock = threading.Lock()
+
+    def is_allowed(self, client_id: str = "default") -> bool:
+        with self.lock:
+            now = time.time()
+            if client_id not in self.requests:
+                self.requests[client_id] = []
+            # Purge timestamps older than window_seconds
+            self.requests[client_id] = [t for t in self.requests[client_id] if now - t < self.window_seconds]
+            if len(self.requests[client_id]) < self.max_requests:
+                self.requests[client_id].append(now)
+                return True
+            return False
+
+
 class TokenBucket:
     """
     High-precision Token Bucket Algorithm with continuous fractional refill.

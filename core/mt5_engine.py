@@ -325,6 +325,10 @@ class MT5InstitutionalEngine:
             "retcode": 10009
         }
 
+    def execute_order(self, *args, **kwargs) -> Dict[str, Any]:
+        """Alias for order_send for unified execution interfaces."""
+        return self.order_send(*args, **kwargs)
+
     def close_position(self, ticket: int, reason: str = "MANUAL_CLOSE") -> Dict[str, Any]:
         pos = next((p for p in self.open_positions if p["ticket"] == ticket), None)
         if not pos:

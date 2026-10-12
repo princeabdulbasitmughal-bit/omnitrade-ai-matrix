@@ -18,6 +18,22 @@ class OrderManager:
             self.mode = mode
             logger.info(f"OrderManager mode switched to: {self.mode.upper()}")
 
+    def execute_order(self, *args, **kwargs) -> Dict[str, Any]:
+        """Unified order execution interface."""
+        if args and len(args) >= 2:
+            symbol = args[0]
+            signal = args[1]
+            price = args[2] if len(args) > 2 else 100.0
+            atr = args[3] if len(args) > 3 else 1.0
+            return self.execute_signal(symbol, signal, price, atr)
+        return self.execute_signal(
+            kwargs.get("symbol", "BTC/USDT"),
+            kwargs.get("signal", kwargs.get("side", "BUY")),
+            kwargs.get("current_price", kwargs.get("price", 100.0)),
+            kwargs.get("atr", 1.0),
+            kwargs.get("reason", "API_EXECUTION")
+        )
+
     def calculate_dynamic_slippage(self, symbol: str, current_price: float, side: str, amount: float, atr: float = 0.0) -> Tuple[float, float]:
         """
         Institutional Dynamic Slippage Model:

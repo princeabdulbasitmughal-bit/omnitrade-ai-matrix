@@ -61,6 +61,9 @@ class WhiteLabelEngine:
         except Exception:
             return []
 
+    def list_tenants(self) -> List[Dict[str, Any]]:
+        return self.get_tenants()
+
     def create_tenant(self, brand_name: str, domain: str, tier: str, admin_email: str, 
                       primary_color: str = "#00f0ff", performance_fee_pct: float = 20.0) -> Dict[str, Any]:
         tenants = self.get_tenants()

@@ -471,8 +471,13 @@ class LiveRealityEngine:
         return self._cache
 
     def get_or_refresh(self) -> Dict[str, Any]:
-        if time.time() - self._last_refresh > self._refresh_interval or not self._cache:
+        if not self._cache:
             self.refresh()
+        elif time.time() - self._last_refresh > self._refresh_interval:
+            try:
+                self._executor.submit(self.refresh)
+            except Exception:
+                pass
         return self._cache
 
     def get_portfolio(self) -> Dict[str, Any]:

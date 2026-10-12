@@ -53,3 +53,6 @@ class VoiceAudioBroadcaster:
             "voice_actor": "WallStreet AI Quantum Voice",
             "audio_url": "/api/voice/latest"
         }
+
+    # Alias for alert broadcasting
+    broadcast_alert = broadcast_audio_commentary

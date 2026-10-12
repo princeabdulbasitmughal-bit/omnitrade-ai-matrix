@@ -38,10 +38,13 @@ class DQNAgent:
         probs = exp_q / np.sum(exp_q)
 
         action_map = {0: "HOLD", 1: "BUY", 2: "SELL"}
+        best_signal = action_map.get(best_act, "HOLD")
         return {
             "model": "Deep Q-Network (DQN Replay Agent)",
-            "signal": action_map.get(best_act, "HOLD"),
+            "signal": best_signal,
+            "action": best_signal,
             "confidence": round(float(probs[best_act]), 3),
+            "q_value": round(float(q_vals[best_act]), 3),
             "q_values": {
                 "HOLD": round(float(q_vals[0]), 3),
                 "BUY": round(float(q_vals[1]), 3),

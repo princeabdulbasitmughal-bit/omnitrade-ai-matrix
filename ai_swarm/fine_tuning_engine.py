@@ -186,5 +186,8 @@ class FineTuningEngine:
             "recent_tuning_logs": self.recent_tuning_logs[-12:]
         }
 
+    def get_status(self) -> Dict[str, Any]:
+        return self.get_tuning_status()
+
 # Global Singleton Instance
 fine_tuning_engine = FineTuningEngine()

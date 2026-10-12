@@ -49,6 +49,7 @@ class OrderBookDepthAnalyzer:
             "total_bid_depth": round(total_bid_vol, 2),
             "total_ask_depth": round(total_ask_vol, 2),
             "order_flow_imbalance": round(float(imbalance), 3),
+            "imbalance_pct": round(float(imbalance) * 100.0, 2),
             "microstructure_pressure": pressure,
             "bids_l2": bids[:5],
             "asks_l2": asks[:5]

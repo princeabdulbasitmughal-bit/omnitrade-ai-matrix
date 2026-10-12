@@ -117,3 +117,7 @@ class MetaLearningOptimizer:
             "recent_logs": self.optimization_logs[-10:],
             "next_scheduled_tuning": "Auto-optimizing every 1-minute execution cycle"
         }
+
+    def get_weights(self) -> Dict[str, float]:
+        """Returns the current model consensus weights."""
+        return dict(self.weights)

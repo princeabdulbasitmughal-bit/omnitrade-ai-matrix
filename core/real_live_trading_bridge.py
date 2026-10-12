@@ -273,6 +273,10 @@ class RealLiveTradingBridge:
             "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
         }
 
+    def execute_live_order(self, *args, **kwargs) -> Dict[str, Any]:
+        """Alias for execute_real_order."""
+        return self.execute_real_order(*args, **kwargs)
+
     def handle_partial_fill(self, ticket: str, filled_lots: float, remaining_lots: float, fill_price: float) -> Dict[str, Any]:
         """
         Updates live order receipt with partial fill information.

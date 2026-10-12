@@ -119,3 +119,15 @@ def atomic_read_json(
             pass
 
     return default, False
+
+
+class AtomicStorage:
+    """Class wrapper providing write and read static methods for atomic state persistence."""
+    @staticmethod
+    def write(filepath: Union[Path, str], data: Any, indent: int = 2, backup: bool = True) -> bool:
+        return atomic_write_json(filepath, data, indent=indent, backup=backup)
+
+    @staticmethod
+    def read(filepath: Union[Path, str], default: Any = None) -> Any:
+        data, _ = atomic_read_json(filepath, default=default)
+        return data if data is not None else (default if default is not None else {})

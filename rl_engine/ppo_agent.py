@@ -73,6 +73,7 @@ class PPOTradingAgent:
         return {
             "model": "Proximal Policy Optimization (PPO Neural Agent)",
             "signal": sig,
+            "action": sig,
             "confidence": round(confidence, 3),
             "state_value_estimate": round(value, 3),
             "probabilities": {

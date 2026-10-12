@@ -105,6 +105,18 @@ class RiskEngine:
         logger.info(msg)
         return True, msg
 
+    def can_open_position(self, symbol: str, entry_price: float, size_usd: float = 0.0) -> Tuple[bool, str]:
+        """
+        Pre-trade risk gatekeeper checking circuit breakers, drawdown, and cash reserves.
+        Returns: (can_trade: bool, reason: str)
+        """
+        is_broken, reason = self.check_circuit_breaker()
+        if is_broken:
+            return False, f"Circuit breaker active: {reason}"
+        if self.portfolio.cash <= 0:
+            return False, "Insufficient cash reserves in portfolio"
+        return True, "Risk check passed: position permitted"
+
     def get_circuit_breaker_status(self) -> Dict[str, Any]:
         """Returns comprehensive diagnostic status of all circuit breaker thresholds."""
         summary = self.portfolio.get_summary()
