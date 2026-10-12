@@ -32,3 +32,9 @@ class SuperTrendStrategy:
             "lower_band": round(lower_band, 4),
             "confidence": 0.78
         }
+
+    # Alias for signal calculation
+    calculate_signals = generate_signal
+
+# Alias for naming consistency
+SupertrendStrategy = SuperTrendStrategy

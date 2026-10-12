@@ -36,3 +36,6 @@ class SMCOrderBlockStrategy:
                 "confidence": 0.79
             }
         ]
+
+    # Alias for method naming
+    calculate_orderblocks = detect_order_blocks

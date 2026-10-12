@@ -277,3 +277,7 @@ class MarketDataProvider:
         # Store in TTL cache
         self.ticker_cache[symbol_upper] = (result, now_ts)
         return result
+
+    # Alias for get_ohlcv
+    get_ohlcv = fetch_ohlcv
+

@@ -83,3 +83,6 @@ class PPOTradingAgent:
             },
             "status": "ONLINE"
         }
+
+# Alias for class name consistency
+PPOAgent = PPOTradingAgent
