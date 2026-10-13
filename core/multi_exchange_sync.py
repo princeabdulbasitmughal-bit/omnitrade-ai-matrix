@@ -13,6 +13,7 @@ class MultiExchangeSyncEngine:
     """
     def __init__(self):
         self.exchanges: Dict[str, Any] = {}
+        self._executor = ThreadPoolExecutor(max_workers=6)
         self._init_exchanges()
         self._cached_sync_data: Dict[str, Any] = {}
         self._last_sync_ts: float = 0.0
@@ -20,11 +21,11 @@ class MultiExchangeSyncEngine:
     def _init_exchanges(self):
         """Initializes public CCXT clients with rate limiting enabled."""
         exchange_classes = {
-            "Binance": (ccxt.binance, {"enableRateLimit": True, "timeout": 2500}),
-            "Bybit": (ccxt.bybit, {"enableRateLimit": True, "timeout": 2500}),
-            "OKX": (ccxt.okx, {"enableRateLimit": True, "timeout": 2500}),
-            "Coinbase": (ccxt.coinbase, {"enableRateLimit": True, "timeout": 2500}),
-            "Kraken": (ccxt.kraken, {"enableRateLimit": True, "timeout": 2500}),
+            "Binance": (ccxt.binance, {"enableRateLimit": True, "timeout": 1800}),
+            "Bybit": (ccxt.bybit, {"enableRateLimit": True, "timeout": 1800}),
+            "OKX": (ccxt.okx, {"enableRateLimit": True, "timeout": 1800}),
+            "Coinbase": (ccxt.coinbase, {"enableRateLimit": True, "timeout": 1800}),
+            "Kraken": (ccxt.kraken, {"enableRateLimit": True, "timeout": 1800}),
         }
 
         for name, (cls, params) in exchange_classes.items():
@@ -77,24 +78,23 @@ class MultiExchangeSyncEngine:
         """
         now = time.time()
         cache_key = symbol
-        if cache_key in self._cached_sync_data and (now - self._last_sync_ts < 2.5):
+        if cache_key in self._cached_sync_data and (now - self._last_sync_ts < 5.0):
             return self._cached_sync_data[cache_key]
 
-        from concurrent.futures import wait, FIRST_COMPLETED
+        from concurrent.futures import wait
         platform_results = []
-        with ThreadPoolExecutor(max_workers=len(self.exchanges) or 4) as executor:
-            futures = [
-                executor.submit(self._fetch_single_exchange, name, ex, symbol)
-                for name, ex in self.exchanges.items()
-            ]
-            done, not_done = wait(futures, timeout=2.5)
-            for f in done:
-                try:
-                    res = f.result()
-                    if res:
-                        platform_results.append(res)
-                except Exception:
-                    pass
+        futures = [
+            self._executor.submit(self._fetch_single_exchange, name, ex, symbol)
+            for name, ex in self.exchanges.items()
+        ]
+        done, not_done = wait(futures, timeout=1.8)
+        for f in done:
+            try:
+                res = f.result(timeout=0.1)
+                if res:
+                    platform_results.append(res)
+            except Exception:
+                pass
 
         # Sort by primary order: Binance, Bybit, OKX, Coinbase, Kraken
         platform_order = {"Binance": 1, "Bybit": 2, "OKX": 3, "Coinbase": 4, "Kraken": 5}

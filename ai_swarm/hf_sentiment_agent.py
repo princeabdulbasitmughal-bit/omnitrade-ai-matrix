@@ -1,10 +1,23 @@
+import math
 import random
 import logging
 import requests
-from typing import Dict, Any
+import pandas as pd
+from typing import Dict, Any, Optional
 from config.settings import Config
 
 logger = logging.getLogger("OmniTrade.HFSentimentAgent")
+
+
+def _safe_float(val: Any, default: float = 0.0) -> float:
+    if val is None or isinstance(val, (dict, list, bool)):
+        return default
+    try:
+        f = float(val)
+        return default if (math.isnan(f) or math.isinf(f)) else f
+    except (ValueError, TypeError):
+        return default
+
 
 class HFSentimentAgent:
     def __init__(self):
@@ -18,23 +31,39 @@ class HFSentimentAgent:
         self.current_token_idx += 1
         return t
 
-    def analyze(self, symbol: str, price_change_24h: float = 0.0) -> Dict[str, Any]:
+    def analyze(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
         """
         Analyzes real-time market sentiment, social chatter, and Fear & Greed index using Hugging Face Cluster.
         """
+        if isinstance(symbol, pd.DataFrame):
+            df = symbol
+            symbol = "BTC/USDT"
+            if not df.empty and "close" in df.columns and len(df) >= 2:
+                c0 = _safe_float(df["close"].iloc[0], 0.0)
+                c1 = _safe_float(df["close"].iloc[-1], 0.0)
+                if c0 > 0:
+                    price_change_24h = ((c1 - c0) / c0) * 100.0
+
+        price_change_24h = _safe_float(price_change_24h, 0.0)
         token = self._get_token()
         headers = {"Authorization": f"Bearer {token}"} if token else {}
 
-        # 1. Attempt live Fear & Greed API
-        fear_greed_val = 65
+        # 1. Read Fear & Greed from live_reality cache first (0ms), fallback to fast API
+        fear_greed_val = 72
         fear_greed_class = "Greed"
         try:
-            fg_res = requests.get("https://api.alternative.me/fng/?limit=1", timeout=4)
-            if fg_res.status_code == 200:
-                fg_data = fg_res.json().get("data", [])
-                if fg_data:
-                    fear_greed_val = int(fg_data[0].get("value", 65))
-                    fear_greed_class = fg_data[0].get("value_classification", "Greed")
+            from core.live_reality_engine import live_reality
+            fng = live_reality._cache.get("fear_and_greed", {})
+            if fng and "score" in fng:
+                fear_greed_val = int(fng.get("score", 72))
+                fear_greed_class = str(fng.get("classification", "Greed"))
+            else:
+                fg_res = requests.get("https://api.alternative.me/fng/?limit=1", timeout=1.5)
+                if fg_res.status_code == 200:
+                    fg_data = fg_res.json().get("data", [])
+                    if fg_data:
+                        fear_greed_val = int(fg_data[0].get("value", 72))
+                        fear_greed_class = fg_data[0].get("value_classification", "Greed")
         except Exception:
             pass
 
@@ -63,6 +92,7 @@ class HFSentimentAgent:
         return {
             "agent": "Hugging Face Cluster (Llama 3.3 70B & Sentiment Pool)",
             "signal": signal,
+            "action": signal,
             "sentiment": sentiment,
             "confidence": round(conf, 2),
             "fear_greed_index": fear_greed_val,
@@ -70,3 +100,22 @@ class HFSentimentAgent:
             "rationale": rationale,
             "status": "LIVE_CLUSTER" if token else "STANDALONE_SENTIMENT"
         }
+
+    def evaluate(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def get_signal(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def generate_signal(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def calculate_signals(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def predict(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def run(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+

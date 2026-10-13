@@ -131,6 +131,10 @@ class FineTuningEngine:
         """
         Executes an automated online fine-tuning step / epoch gradient pass across all LoRA adapters.
         """
+        try:
+            trade_pnl = float(trade_pnl) if trade_pnl is not None and not np.isnan(float(trade_pnl)) else 0.0
+        except (ValueError, TypeError):
+            trade_pnl = 0.0
         self.total_steps += 24
         # Dynamic reward-based learning adjustment
         decay = 0.985 if trade_pnl >= 0 else 0.995
@@ -189,5 +193,16 @@ class FineTuningEngine:
     def get_status(self) -> Dict[str, Any]:
         return self.get_tuning_status()
 
+    def evaluate(self, trade_pnl: float = 0.0, win_count: int = 14) -> Dict[str, Any]:
+        return self.execute_fine_tuning_step(trade_pnl=trade_pnl, win_count=win_count)
+
+    def run(self, trade_pnl: float = 0.0, win_count: int = 14) -> Dict[str, Any]:
+        return self.execute_fine_tuning_step(trade_pnl=trade_pnl, win_count=win_count)
+
+    def predict(self, trade_pnl: float = 0.0, win_count: int = 14) -> Dict[str, Any]:
+        return self.get_tuning_status()
+
+
 # Global Singleton Instance
 fine_tuning_engine = FineTuningEngine()
+

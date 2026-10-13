@@ -1,8 +1,10 @@
 import os
 import time
 import json
+import math
 import logging
 import requests
+import pandas as pd
 from typing import Dict, Any, Optional
 from pathlib import Path
 from dotenv import load_dotenv
@@ -13,6 +15,17 @@ if root_env.exists():
     load_dotenv(dotenv_path=root_env)
 
 logger = logging.getLogger("OmniTrade.GroqSentimentAgent")
+
+
+def _safe_float(val: Any, default: float = 0.0) -> float:
+    if val is None or isinstance(val, (dict, list, bool)):
+        return default
+    try:
+        f = float(val)
+        return default if (math.isnan(f) or math.isinf(f)) else f
+    except (ValueError, TypeError):
+        return default
+
 
 class GroqSentimentAgent:
     """
@@ -31,11 +44,21 @@ class GroqSentimentAgent:
         self.model = os.getenv("GROQ_SENTIMENT_MODEL", "openai/gpt-oss-120b")
         self.base_url = "https://api.groq.com/openai/v1/chat/completions"
 
-    def analyze(self, symbol: str, price_change_24h: float = 0.0) -> Dict[str, Any]:
+    def analyze(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
         """
         Runs high-speed sentiment analysis using Groq LPU with Fear & Greed synthesis.
         """
         t0 = time.time()
+        if isinstance(symbol, pd.DataFrame):
+            df = symbol
+            symbol = "BTC/USDT"
+            if not df.empty and "close" in df.columns and len(df) >= 2:
+                c0 = _safe_float(df["close"].iloc[0], 0.0)
+                c1 = _safe_float(df["close"].iloc[-1], 0.0)
+                if c0 > 0:
+                    price_change_24h = ((c1 - c0) / c0) * 100.0
+
+        price_change_24h = _safe_float(price_change_24h, 0.0)
 
         # 1. Fetch live Fear & Greed Index
         fear_greed_val = 65
@@ -106,24 +129,26 @@ Respond STRICTLY in valid JSON matching this schema:
                     )
                     if resp.status_code == 200:
                         content = resp.json()["choices"][0]["message"]["content"]
-                        data = json.loads(content)
-                        sig = data.get("signal", baseline_signal).upper()
-                        if sig not in ["BUY", "SELL", "HOLD"]:
-                            sig = baseline_signal
-                        conf = float(data.get("confidence", baseline_conf))
-                        conf = max(0.40, min(0.95, conf))
-                        elapsed_ms = round((time.time() - t0) * 1000, 1)
-                        return {
-                            "agent": f"Groq LPU Sentiment ({target_model})",
-                            "signal": sig,
-                            "sentiment": data.get("sentiment", baseline_sentiment).upper(),
-                            "confidence": round(conf, 2),
-                            "fear_greed_index": fear_greed_val,
-                            "fear_greed_classification": fear_greed_class,
-                            "rationale": data.get("rationale", baseline_rationale),
-                            "status": "LIVE_GROQ_LPU",
-                            "latency_ms": elapsed_ms
-                        }
+                        data = json.loads(content or "{}")
+                        if isinstance(data, dict):
+                            sig = str(data.get("signal") or baseline_signal).upper()
+                            if sig not in ["BUY", "SELL", "HOLD"]:
+                                sig = baseline_signal
+                            conf = _safe_float(data.get("confidence"), baseline_conf)
+                            conf = max(0.40, min(0.95, conf))
+                            elapsed_ms = round((time.time() - t0) * 1000, 1)
+                            return {
+                                "agent": f"Groq LPU Sentiment ({target_model})",
+                                "signal": sig,
+                                "action": sig,
+                                "sentiment": str(data.get("sentiment") or baseline_sentiment).upper(),
+                                "confidence": round(conf, 2),
+                                "fear_greed_index": fear_greed_val,
+                                "fear_greed_classification": fear_greed_class,
+                                "rationale": str(data.get("rationale") or baseline_rationale),
+                                "status": "LIVE_GROQ_LPU",
+                                "latency_ms": elapsed_ms
+                            }
                 except Exception as e:
                     logger.debug(f"Groq model {target_model} failed: {e}")
                     continue
@@ -133,6 +158,7 @@ Respond STRICTLY in valid JSON matching this schema:
         return {
             "agent": "Groq Sentiment Engine (Deterministic Mode)",
             "signal": baseline_signal,
+            "action": baseline_signal,
             "sentiment": baseline_sentiment,
             "confidence": round(baseline_conf, 2),
             "fear_greed_index": fear_greed_val,
@@ -141,3 +167,22 @@ Respond STRICTLY in valid JSON matching this schema:
             "status": "DETERMINISTIC_FALLBACK",
             "latency_ms": elapsed_ms
         }
+
+    def evaluate(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def get_signal(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def generate_signal(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def calculate_signals(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def predict(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+
+    def run(self, symbol: Any = "BTC/USDT", price_change_24h: float = 0.0) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, price_change_24h=price_change_24h)
+

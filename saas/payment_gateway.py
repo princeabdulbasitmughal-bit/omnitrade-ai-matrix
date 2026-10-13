@@ -56,17 +56,40 @@ class SaaSRevenueEngine:
 
     def create_crypto_checkout_invoice(self, plan_id: str, email: str = "") -> Dict[str, Any]:
         """Generates real USDT/USDC multi-chain checkout invoice for instant subscriber activation."""
-        prices = {"tier_pro": 49.00, "tier_institutional": 199.00, "tier_starter": 0.00}
-        plan_names = {"tier_pro": "Pro Algo Master", "tier_institutional": "Institutional Hedge Fund", "tier_starter": "Starter Free"}
+        prices = {
+            "tier_pro": 49.00,
+            "pro": 49.00,
+            "tier_institutional": 199.00,
+            "institutional": 199.00,
+            "tier_enterprise": 999.00,
+            "enterprise_whitelabel": 999.00,
+            "tier_starter": 0.00,
+            "starter": 0.00
+        }
+        plan_names = {
+            "tier_pro": "Pro Algo Master",
+            "pro": "Pro Algo Master",
+            "tier_institutional": "Institutional Hedge Fund",
+            "institutional": "Institutional Hedge Fund",
+            "tier_enterprise": "Enterprise White-Label",
+            "enterprise_whitelabel": "Enterprise White-Label",
+            "tier_starter": "Starter Free",
+            "starter": "Starter Free"
+        }
 
         amount = prices.get(plan_id, 49.00)
         invoice_id = f"inv_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+        license_key = f"OMNI-PRO-{uuid.uuid4().hex[:4].upper()}-{uuid.uuid4().hex[:4].upper()}-2026"
 
         invoice = {
             "invoice_id": invoice_id,
             "plan_id": plan_id,
-            "plan_name": plan_names.get(plan_id, "Pro Algo"),
+            "plan_name": plan_names.get(plan_id, "Pro Algo Master"),
+            "email": email or "vip@omnitrade.ai",
             "amount_usd": amount,
+            "network": "USDT (TRC-20 / BEP-20) & USDC (Solana)",
+            "payment_address": self.crypto_wallets["USDT_TRC20"],
+            "license_key": license_key,
             "crypto_accepted": ["USDT (TRC-20)", "USDT (BEP-20)", "USDC (Solana)", "BTC"],
             "deposit_wallets": self.crypto_wallets,
             "status": "PENDING_PAYMENT",

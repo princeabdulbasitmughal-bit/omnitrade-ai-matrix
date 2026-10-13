@@ -1,4 +1,4 @@
-﻿"""
+"""
 OmniTrade Pro - Linked Autonomous AI Agentic Council
 ====================================================
 Interconnected multi-agent council where 6 specialized AI agents deliberate in real-time,
@@ -43,8 +43,9 @@ class MacroSentinelAgent(BaseAgent):
         super().__init__("Macro Sentinel Agent (Kimi K3 / DeepSeek-V3)", "Macro Regimes & News", "#a855f7")
 
     def analyze(self, symbol: str, real_data: Dict[str, Any]) -> Dict[str, Any]:
-        fng = real_data.get("fear_and_greed", {}).get("value", 71)
-        fng_class = real_data.get("fear_and_greed", {}).get("value_classification", "Greed")
+        fng_data = real_data.get("fear_and_greed", {})
+        fng = fng_data.get("score", fng_data.get("value", 71))
+        fng_class = fng_data.get("classification", fng_data.get("value_classification", "Greed"))
         funding = real_data.get("funding_rates", {}).get(symbol.replace("/", ""), {}).get("funding_rate_8h_pct", 0.01)
 
         if fng > 75 and funding > 0.03:
@@ -220,6 +221,18 @@ class AutonomousAgenticCouncil:
         self.risk_agent = RiskGuardianAgent()
         self.meta_supervisor = MetaSupervisorAgent()
         self.a_to_z_auto_trading_enabled = True
+        try:
+            self.run_full_deliberation(
+                symbol="BTC/USDT",
+                price=77850.0,
+                change_24h=4.82,
+                technicals={"rsi": 44.5, "supertrend_is_bull": True},
+                real_data={"fear_and_greed": {"score": 72, "classification": "Greed"}, "funding_rates": {"BTCUSDT": {"funding_rate_8h_pct": 0.01}}},
+                balance=25000.0,
+                win_rate=65.96
+            )
+        except Exception:
+            pass
 
     def get_council_agents(self) -> List[Dict[str, Any]]:
         agents = [

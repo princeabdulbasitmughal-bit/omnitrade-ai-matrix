@@ -1,13 +1,15 @@
+import math
 import numpy as np
 import random
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+
 
 class MonteCarloSimulator:
     @staticmethod
     def run_simulation(
-        trade_pnls: List[float], 
-        initial_capital: float = 10000.0, 
-        num_simulations: int = 1000, 
+        trade_pnls: Optional[List[float]] = None,
+        initial_capital: float = 10000.0,
+        num_simulations: int = 1000,
         trade_count: int = 100,
         ruin_threshold_pct: float = 50.0
     ) -> Dict[str, Any]:
@@ -16,9 +18,23 @@ class MonteCarloSimulator:
         Computes 95% and 99% confidence intervals for ending capital, max drawdown,
         probability of profit, path-dependent risk of ruin, and Value-at-Risk (VaR).
         """
-        if not trade_pnls or len(trade_pnls) < 5:
+        initial_capital = float(initial_capital) if initial_capital and initial_capital > 0 else 10000.0
+        num_simulations = max(1, int(num_simulations or 1000))
+        trade_count = max(1, int(trade_count or 100))
+
+        cleaned_pnls: List[float] = []
+        if trade_pnls:
+            for val in trade_pnls:
+                try:
+                    f = float(val)
+                    if not (math.isnan(f) or math.isinf(f)):
+                        cleaned_pnls.append(f)
+                except (ValueError, TypeError):
+                    continue
+
+        if len(cleaned_pnls) < 5:
             # Synthetic institutional bootstrap distribution with positive expectancy
-            trade_pnls = [150.0, 220.0, -95.0, 310.0, -80.0, 180.0, -110.0, 450.0, -90.0, 200.0]
+            cleaned_pnls = [150.0, 220.0, -95.0, 310.0, -80.0, 180.0, -110.0, 450.0, -90.0, 200.0]
 
         sim_ending_equities = []
         sim_max_drawdowns = []
@@ -26,7 +42,7 @@ class MonteCarloSimulator:
         ruin_barrier = initial_capital * (ruin_threshold_pct / 100.0)
 
         for _ in range(num_simulations):
-            sampled_pnls = random.choices(trade_pnls, k=trade_count)
+            sampled_pnls = random.choices(cleaned_pnls, k=trade_count)
             eq = initial_capital
             peak = initial_capital
             max_dd = 0.0
@@ -36,7 +52,7 @@ class MonteCarloSimulator:
                 eq += p
                 if eq <= ruin_barrier:
                     was_ruined = True
-                
+
                 # If account hits zero (bankruptcy), account cannot continue trading
                 if eq <= 0:
                     eq = 0.0
@@ -111,3 +127,38 @@ class MonteCarloSimulator:
             "cvar_99_pct": round(cvar_99_pct, 2),
             "ruin_threshold_pct": ruin_threshold_pct,
         }
+
+    @classmethod
+    def run(
+        cls,
+        trade_pnls: Optional[List[float]] = None,
+        initial_capital: float = 10000.0,
+        num_simulations: int = 1000,
+        trade_count: int = 100,
+        ruin_threshold_pct: float = 50.0
+    ) -> Dict[str, Any]:
+        return cls.run_simulation(
+            trade_pnls=trade_pnls,
+            initial_capital=initial_capital,
+            num_simulations=num_simulations,
+            trade_count=trade_count,
+            ruin_threshold_pct=ruin_threshold_pct
+        )
+
+    @classmethod
+    def evaluate(
+        cls,
+        trade_pnls: Optional[List[float]] = None,
+        initial_capital: float = 10000.0,
+        num_simulations: int = 1000,
+        trade_count: int = 100,
+        ruin_threshold_pct: float = 50.0
+    ) -> Dict[str, Any]:
+        return cls.run_simulation(
+            trade_pnls=trade_pnls,
+            initial_capital=initial_capital,
+            num_simulations=num_simulations,
+            trade_count=trade_count,
+            ruin_threshold_pct=ruin_threshold_pct
+        )
+

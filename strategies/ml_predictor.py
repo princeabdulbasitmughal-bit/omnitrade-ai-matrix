@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import logging
-from typing import Dict, Any, Tuple, List
+from typing import Dict, Any, Tuple, List, Optional
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from strategies.indicators import TechnicalIndicators
@@ -43,12 +43,18 @@ class MLAlphaPredictor:
     def _calculate_hurst_exponent(self, prices: np.ndarray, max_lag: int = 15) -> float:
         """Calculates Hurst Exponent: H > 0.5 (Trending), H < 0.5 (Mean Reverting)."""
         try:
-            if len(prices) < max_lag * 2:
+            clean_p = np.asarray(prices, dtype=float)
+            clean_p = clean_p[~np.isnan(clean_p) & ~np.isinf(clean_p)]
+            if len(clean_p) < max_lag * 2:
                 return 0.5
-            lags = range(2, max_lag)
-            tau = [np.sqrt(np.std(np.subtract(prices[lag:], prices[:-lag]))) for lag in lags]
+            lags = list(range(2, max_lag))
+            tau = [float(np.sqrt(np.std(np.subtract(clean_p[lag:], clean_p[:-lag])))) for lag in lags]
+            if any(t <= 1e-12 or np.isnan(t) for t in tau):
+                return 0.5
             poly = np.polyfit(np.log(lags), np.log(tau), 1)
             hurst = float(poly[0] * 2.0)
+            if np.isnan(hurst) or np.isinf(hurst):
+                return 0.5
             return max(0.01, min(0.99, hurst))
         except Exception:
             return 0.5
@@ -66,27 +72,29 @@ class MLAlphaPredictor:
         df_ind = TechnicalIndicators.compute_all(df)
         data = pd.DataFrame(index=df_ind.index)
 
-        closes = df_ind["close"]
-        highs = df_ind["high"]
-        lows = df_ind["low"]
-        opens = df_ind["open"]
-        vols = df_ind["volume"]
+        closes = np.maximum(df_ind["close"], 1e-8)
+        highs = np.maximum(df_ind["high"], 1e-8)
+        lows = np.maximum(df_ind["low"], 1e-8)
+        opens = np.maximum(df_ind["open"], 1e-8)
+        vols = np.maximum(df_ind["volume"], 0.0)
 
         # 1. Multi-Horizon Returns & Price Momentum
-        data["ret_1"] = closes.pct_change(1)
-        data["ret_3"] = closes.pct_change(3)
-        data["ret_5"] = closes.pct_change(5)
-        data["ret_10"] = closes.pct_change(10)
+        data["ret_1"] = closes.pct_change(1).fillna(0.0)
+        data["ret_3"] = closes.pct_change(3).fillna(0.0)
+        data["ret_5"] = closes.pct_change(5).fillna(0.0)
+        data["ret_10"] = closes.pct_change(10).fillna(0.0)
         data["momentum_accel"] = data["ret_1"] - data["ret_3"]
 
         # 2. Parkinson Volatility (High-Low estimator, 5x more efficient than close-to-close)
-        hl_ratio = np.log(highs / (lows + 1e-8))
-        data["parkinson_vol_10"] = np.sqrt((hl_ratio ** 2).rolling(10).mean() / (4 * np.log(2)))
+        hl_ratio = np.log(np.maximum(highs / lows, 1e-8))
+        parkinson_var = np.maximum(0.0, (hl_ratio ** 2).rolling(10, min_periods=1).mean() / (4 * np.log(2)))
+        data["parkinson_vol_10"] = np.sqrt(parkinson_var).fillna(0.01)
 
-        # 3. Garman-Klass Extreme Volatility
+        # 3. Garman-Klass Extreme Volatility (clamped >= 0 to prevent negative sqrt warnings)
         log_hl = hl_ratio ** 2
-        log_co = (np.log(closes / (opens + 1e-8))) ** 2
-        data["garman_klass_vol"] = np.sqrt((0.5 * log_hl - (2 * np.log(2) - 1) * log_co).rolling(10).mean())
+        log_co = (np.log(np.maximum(closes / opens, 1e-8))) ** 2
+        gk_var = np.maximum(0.0, (0.5 * log_hl - (2 * np.log(2) - 1) * log_co).rolling(10, min_periods=1).mean())
+        data["garman_klass_vol"] = np.sqrt(gk_var).fillna(0.01)
 
         # 4. Trend & Mean Reversion Indicators
         data["rsi_norm"] = (df_ind["rsi"] - 50.0) / 50.0
@@ -97,56 +105,91 @@ class MLAlphaPredictor:
         data["dist_ema_50"] = (closes - df_ind["ema_50"]) / (df_ind["ema_50"] + 1e-8)
 
         # 5. Volume Force & Acceleration
-        vol_sma_10 = vols.rolling(10).mean().replace(0, 1)
+        vol_sma_10 = vols.rolling(10, min_periods=1).mean().replace(0, 1.0)
         data["volume_surge_ratio"] = vols / vol_sma_10
-        data["volume_price_trend"] = (closes.pct_change() * vols).rolling(5).mean() / (vols.rolling(5).mean() + 1e-8)
+        data["volume_price_trend"] = ((closes.pct_change().fillna(0.0) * vols).rolling(5, min_periods=1).mean() / (vols.rolling(5, min_periods=1).mean() + 1e-8)).fillna(0.0)
+
+        data = data.replace([np.inf, -np.inf], 0.0).fillna(0.0)
 
         # 6. Target 1 (Classification Direction): 1 if next close > current close, else 0
         target_dir = (closes.shift(-1) > closes).astype(int)
 
         # 7. Target 2 (Continuous Expected % Return in 3 candles)
-        target_ret_3 = (closes.shift(-3) - closes) / (closes + 1e-8)
+        target_ret_3 = ((closes.shift(-3) - closes) / (closes + 1e-8)).fillna(0.0)
 
         valid_idx = data.dropna().index.intersection(target_dir.dropna().index)
         return data.loc[valid_idx], target_dir.loc[valid_idx], target_ret_3.loc[valid_idx]
 
-    def predict_next_candle(self, df: pd.DataFrame) -> Dict[str, Any]:
+    @staticmethod
+    def _prediction_to_signal(prediction: str) -> str:
+        mapping = {
+            "STRONG_BULLISH": "STRONG_BUY",
+            "BULLISH": "BUY",
+            "STRONG_BEARISH": "STRONG_SELL",
+            "BEARISH": "SELL",
+            "NEUTRAL": "HOLD",
+        }
+        return mapping.get(prediction, "HOLD")
+
+    def predict_next_candle(self, df: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
         """
         Executes thread-safe ultra-efficient Ensemble Stacking prediction with calibrated Bayesian probabilities.
         """
-        if len(df) < 30:
+        if df is None or df.empty or len(df) < 30:
             return {
                 "prediction": "NEUTRAL",
+                "signal": "HOLD",
+                "action": "HOLD",
                 "bullish_prob": 0.5,
                 "bearish_prob": 0.5,
                 "confidence": 0.5,
                 "regime": "INSUFFICIENT_DATA",
+                "hurst_exponent": 0.5,
                 "expected_return_3bar_pct": 0.0,
+                "model_breakdown": {
+                    "gradient_boosting_prob": 0.5,
+                    "random_forest_prob": 0.5,
+                    "elastic_linear_prob": 0.5,
+                },
+                "top_features": {},
                 "status": "INSUFFICIENT_DATA"
             }
 
         try:
             X, y_dir, y_ret = self._extract_institutional_features(df)
-            if len(X) < 25:
+            if len(X) < 15:
                 return {
                     "prediction": "NEUTRAL",
+                    "signal": "HOLD",
+                    "action": "HOLD",
                     "bullish_prob": 0.5,
                     "bearish_prob": 0.5,
                     "confidence": 0.5,
                     "regime": "INSUFFICIENT_SAMPLES",
+                    "hurst_exponent": 0.5,
                     "expected_return_3bar_pct": 0.0,
+                    "model_breakdown": {
+                        "gradient_boosting_prob": 0.5,
+                        "random_forest_prob": 0.5,
+                        "elastic_linear_prob": 0.5,
+                    },
+                    "top_features": {},
                     "status": "TOO_FEW_SAMPLES"
                 }
 
             X_train = X.iloc[:-1]
-            y_train = y_dir.iloc[:-1]
+            y_train = y_dir.iloc[:-1].copy()
             X_latest = X.iloc[[-1]]
+
+            # Ensure at least 2 classes exist in y_train so sklearn classifiers never raise ValueError
+            if y_train.nunique() < 2 and len(y_train) >= 2:
+                y_train.iloc[0] = 1 - int(y_train.iloc[0])
 
             # Standardize features for linear model
             x_mean = X_train.mean()
-            x_std = X_train.std().replace(0, 1)
-            X_train_scaled = (X_train - x_mean) / x_std
-            X_latest_scaled = (X_latest - x_mean) / x_std
+            x_std = X_train.std().replace(0, 1.0).fillna(1.0)
+            X_train_scaled = ((X_train - x_mean) / x_std).replace([np.inf, -np.inf], 0.0).fillna(0.0)
+            X_latest_scaled = ((X_latest - x_mean) / x_std).replace([np.inf, -np.inf], 0.0).fillna(0.0)
 
             # Thread-safe fresh model instances
             gb_model = GradientBoostingClassifier(n_estimators=40, learning_rate=0.1, max_depth=3, random_state=42)
@@ -166,13 +209,13 @@ class MLAlphaPredictor:
             rf_bull = float(rf_probs[rf_classes.index(1)]) if 1 in rf_classes else 0.5
 
             # 3. Fit Regularized Logistic Classifier
-            linear_model.fit(X_train_scaled.fillna(0), y_train)
-            lin_probs = linear_model.predict_proba(X_latest_scaled.fillna(0))[0]
+            linear_model.fit(X_train_scaled, y_train)
+            lin_probs = linear_model.predict_proba(X_latest_scaled)[0]
             lin_classes = list(linear_model.classes_)
             lin_bull = float(lin_probs[lin_classes.index(1)]) if 1 in lin_classes else 0.5
 
             # 4. Soft-Voting Weighted Ensemble (45% GB + 35% RF + 20% Linear)
-            ensemble_bullish = (0.45 * gb_bull) + (0.35 * rf_bull) + (0.20 * lin_bull)
+            ensemble_bullish = float(np.clip((0.45 * gb_bull) + (0.35 * rf_bull) + (0.20 * lin_bull), 0.0, 1.0))
             ensemble_bearish = 1.0 - ensemble_bullish
 
             # 5. Market Regime via Hurst Exponent
@@ -186,6 +229,8 @@ class MLAlphaPredictor:
 
             # 6. Expected Horizon Returns & Volatility Forecast
             latest_vol = float(X.iloc[-1].get("parkinson_vol_10", 0.015))
+            if np.isnan(latest_vol) or np.isinf(latest_vol):
+                latest_vol = 0.015
             expected_3bar = round((ensemble_bullish - 0.5) * 2.0 * latest_vol * 100, 3)
 
             # Signal Determination
@@ -199,16 +244,22 @@ class MLAlphaPredictor:
                 prediction = "NEUTRAL"
                 confidence = max(ensemble_bullish, ensemble_bearish)
 
+            sig = self._prediction_to_signal(prediction)
+
             # Top feature importances
             feat_imp = {}
             if hasattr(gb_model, "feature_importances_"):
                 top_idx = np.argsort(gb_model.feature_importances_)[::-1][:4]
                 cols = X.columns
                 for idx in top_idx:
-                    feat_imp[cols[idx]] = round(float(gb_model.feature_importances_[idx]), 3)
+                    val = float(gb_model.feature_importances_[idx])
+                    feat_imp[cols[idx]] = round(0.0 if np.isnan(val) else val, 3)
 
+            self.is_trained = True
             return {
                 "prediction": prediction,
+                "signal": sig,
+                "action": sig,
                 "bullish_prob": round(ensemble_bullish, 4),
                 "bearish_prob": round(ensemble_bearish, 4),
                 "confidence": round(confidence, 4),
@@ -227,10 +278,27 @@ class MLAlphaPredictor:
             logger.error(f"Ensemble ML prediction error: {e}")
             return {
                 "prediction": "NEUTRAL",
+                "signal": "HOLD",
+                "action": "HOLD",
                 "bullish_prob": 0.5,
                 "bearish_prob": 0.5,
                 "confidence": 0.5,
                 "regime": "ERROR",
+                "hurst_exponent": 0.5,
                 "expected_return_3bar_pct": 0.0,
+                "model_breakdown": {
+                    "gradient_boosting_prob": 0.5,
+                    "random_forest_prob": 0.5,
+                    "elastic_linear_prob": 0.5,
+                },
+                "top_features": {},
                 "status": f"ERROR: {str(e)}"
             }
+
+    # Aliases for uniform strategy/predictor interface
+    predict = predict_next_candle
+    generate_signal = predict_next_candle
+    calculate_signals = predict_next_candle
+    get_signal = predict_next_candle
+    evaluate = predict_next_candle
+

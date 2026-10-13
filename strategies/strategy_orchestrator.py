@@ -16,22 +16,22 @@ logger = logging.getLogger("OmniTrade.StrategyOrchestrator")
 class StrategyOrchestrator:
     def __init__(
         self,
-        market_data: MarketDataProvider,
-        portfolio: Portfolio,
-        risk_engine: RiskEngine,
-        order_manager: OrderManager,
-        consensus_matrix: AIConsensusMatrix
+        market_data: Optional[MarketDataProvider] = None,
+        portfolio: Optional[Portfolio] = None,
+        risk_engine: Optional[RiskEngine] = None,
+        order_manager: Optional[OrderManager] = None,
+        consensus_matrix: Optional[AIConsensusMatrix] = None
     ):
-        self.market_data = market_data
-        self.portfolio = portfolio
-        self.risk_engine = risk_engine
-        self.order_manager = order_manager
-        self.consensus_matrix = consensus_matrix
+        self.market_data = market_data or MarketDataProvider()
+        self.portfolio = portfolio or Portfolio()
+        self.risk_engine = risk_engine or RiskEngine(self.portfolio)
+        self.order_manager = order_manager or OrderManager(self.portfolio, self.risk_engine)
+        self.consensus_matrix = consensus_matrix or AIConsensusMatrix()
         self.ml_predictor = MLAlphaPredictor()
         self.auto_trade_enabled = True
         self._analysis_cache: Dict[str, Any] = {} # (symbol, timeframe) -> (timestamp, data)
 
-    def analyze_symbol(self, symbol: str, timeframe: str = "15m") -> Dict[str, Any]:
+    def analyze_symbol(self, symbol: str = "BTC/USDT", timeframe: str = "15m", df: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
         """
         Runs the full analysis pipeline for a single asset:
         1. Fetch OHLCV data
@@ -43,13 +43,17 @@ class StrategyOrchestrator:
         import time
         cache_key = f"{symbol}_{timeframe}"
         now_ts = time.time()
-        if cache_key in self._analysis_cache:
+        if df is None and cache_key in self._analysis_cache:
             cached_ts, cached_data = self._analysis_cache[cache_key]
             if now_ts - cached_ts < 8.0: # 8-second cache
                 return cached_data
 
-        df = self.market_data.fetch_ohlcv(symbol, timeframe=timeframe, limit=120)
-        ticker = self.market_data.get_current_ticker(symbol)
+        if df is None:
+            df = self.market_data.fetch_ohlcv(symbol, timeframe=timeframe, limit=120)
+            ticker = self.market_data.get_current_ticker(symbol)
+        else:
+            last_close = float(df["close"].iloc[-1]) if (not df.empty and "close" in df.columns) else 0.0
+            ticker = {"symbol": symbol, "last": last_close, "change_24h": 0.0}
 
         tech_summary = TechnicalIndicators.get_latest_summary(df)
         smc_summary = SmartMoneyConcepts.get_smc_summary(df)
@@ -62,17 +66,37 @@ class StrategyOrchestrator:
             market_state=ticker
         )
 
+        final_sig = ai_consensus.get("final_signal", "HOLD")
+        final_conf = ai_consensus.get("aggregate_confidence", 0.5)
+
         result = {
             "symbol": symbol,
+            "signal": final_sig,
+            "action": final_sig,
+            "confidence": final_conf,
             "ticker": ticker,
             "technical_indicators": tech_summary,
             "smart_money_concepts": smc_summary,
             "ml_prediction": ml_summary,
             "ai_consensus": ai_consensus,
-            "ohlcv_candles": df.tail(60).to_dict(orient="records") if not df.empty else []
+            "ohlcv_candles": df.tail(60).to_dict(orient="records") if (df is not None and not df.empty) else []
         }
-        self._analysis_cache[cache_key] = (now_ts, result)
+        if df is None:
+            self._analysis_cache[cache_key] = (now_ts, result)
         return result
+
+    def generate_signal(self, df: Optional[pd.DataFrame] = None, symbol: str = "BTC/USDT", timeframe: str = "15m") -> Dict[str, Any]:
+        if isinstance(df, str):
+            symbol = df
+            df = None
+        return self.analyze_symbol(symbol=symbol, timeframe=timeframe, df=df)
+
+    calculate_signals = generate_signal
+    get_signal = generate_signal
+    evaluate = generate_signal
+    predict = generate_signal
+    run = generate_signal
+
 
     def manage_open_positions(self, current_prices: Dict[str, float], atrs: Dict[str, float]) -> List[Dict[str, Any]]:
         """

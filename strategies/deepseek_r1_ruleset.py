@@ -34,18 +34,34 @@ class FibonacciEngine:
     INVALIDATION_FIB = 0.886
 
     @staticmethod
-    def identify_swing_points(df: pd.DataFrame, window: int = 5) -> Dict[str, Any]:
+    def identify_swing_points(df: Optional[pd.DataFrame], window: int = 5) -> Dict[str, Any]:
         """
         Extracts recent swing highs and swing lows using local fractal extrema.
         """
+        if df is None or df.empty or not all(c in df.columns for c in ["high", "low"]):
+            return {
+                "swing_high": 0.0,
+                "swing_low": 0.0,
+                "all_swing_highs": [0.0],
+                "all_swing_lows": [0.0],
+                "last_high_idx": 0,
+                "last_low_idx": 0,
+                "trend": "UNKNOWN"
+            }
+
+        high_series = pd.to_numeric(df["high"], errors="coerce").ffill().bfill().fillna(0.0)
+        low_series = pd.to_numeric(df["low"], errors="coerce").ffill().bfill().fillna(0.0)
+
         if len(df) < window * 2 + 1:
-            high = float(df["high"].max()) if not df.empty else 0.0
-            low = float(df["low"].min()) if not df.empty else 0.0
+            high = float(high_series.max()) if not high_series.empty else 0.0
+            low = float(low_series.min()) if not low_series.empty else 0.0
             return {
                 "swing_high": high,
                 "swing_low": low,
                 "all_swing_highs": [high],
                 "all_swing_lows": [low],
+                "last_high_idx": max(0, len(df) - 1),
+                "last_low_idx": max(0, len(df) - 1),
                 "trend": "UNKNOWN"
             }
 
@@ -55,26 +71,26 @@ class FibonacciEngine:
         low_indices = []
 
         for i in range(window, len(df) - window):
-            curr_high = df["high"].iloc[i]
-            curr_low = df["low"].iloc[i]
+            curr_high = float(high_series.iloc[i])
+            curr_low = float(low_series.iloc[i])
             
             # Fractal High
-            if all(curr_high >= df["high"].iloc[i - j] for j in range(1, window + 1)) and \
-               all(curr_high >= df["high"].iloc[i + j] for j in range(1, window + 1)):
-                highs.append(float(curr_high))
+            if all(curr_high >= float(high_series.iloc[i - j]) for j in range(1, window + 1)) and \
+               all(curr_high >= float(high_series.iloc[i + j]) for j in range(1, window + 1)):
+                highs.append(curr_high)
                 high_indices.append(i)
 
             # Fractal Low
-            if all(curr_low <= df["low"].iloc[i - j] for j in range(1, window + 1)) and \
-               all(curr_low <= df["low"].iloc[i + j] for j in range(1, window + 1)):
-                lows.append(float(curr_low))
+            if all(curr_low <= float(low_series.iloc[i - j]) for j in range(1, window + 1)) and \
+               all(curr_low <= float(low_series.iloc[i + j]) for j in range(1, window + 1)):
+                lows.append(curr_low)
                 low_indices.append(i)
 
         if not highs:
-            highs = [float(df["high"].max())]
+            highs = [float(high_series.max())]
             high_indices = [len(df) - 1]
         if not lows:
-            lows = [float(df["low"].min())]
+            lows = [float(low_series.min())]
             low_indices = [len(df) - 1]
 
         recent_high = highs[-1]
@@ -107,9 +123,19 @@ class FibonacciEngine:
         """
         Computes accurate Fibonacci retracement and extension price levels.
         """
-        diff = abs(swing_high - swing_low)
-        if diff <= 0:
-            return {"error": "Invalid swing range", "levels": {}}
+        diff = abs(float(swing_high) - float(swing_low))
+        if diff <= 0 or np.isnan(diff):
+            return {
+                "error": "Invalid swing range",
+                "direction": direction.upper(),
+                "swing_high": float(swing_high) if not np.isnan(float(swing_high)) else 0.0,
+                "swing_low": float(swing_low) if not np.isnan(float(swing_low)) else 0.0,
+                "delta": 0.0,
+                "levels": {},
+                "retracements": {},
+                "ote_zone": {},
+                "extensions": {}
+            }
 
         levels = {}
         extensions = {}
@@ -165,10 +191,16 @@ class FibonacciEngine:
         """
         Evaluates whether current market price is inside the Golden Pocket / OTE zone.
         """
-        if "ote_zone" not in fib_matrix:
-            return {"in_ote": False, "in_golden_pocket": False, "zone_status": "NONE"}
+        if not fib_matrix or not fib_matrix.get("ote_zone"):
+            return {
+                "in_ote": False,
+                "in_golden_pocket": False,
+                "zone_status": "NONE",
+                "current_price": float(current_price) if current_price is not None else 0.0,
+                "ote_bounds": {}
+            }
 
-        direction = fib_matrix["direction"]
+        direction = fib_matrix.get("direction", "BULLISH")
         ote = fib_matrix["ote_zone"]
 
         in_ote = False
@@ -218,6 +250,14 @@ class FibonacciEngine:
             "ote_bounds": ote
         }
 
+    @classmethod
+    def evaluate(cls, df: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
+        swings = cls.identify_swing_points(df)
+        matrix = cls.calculate_fibonacci_matrix(swings["swing_high"], swings["swing_low"], direction=swings["trend"] if swings["trend"] in ("BULLISH", "BEARISH") else "BULLISH")
+        price = float(df["close"].iloc[-1]) if (df is not None and not df.empty and "close" in df.columns) else swings["swing_low"]
+        zone = cls.evaluate_price_in_fib_zone(price, matrix)
+        return {**matrix, **zone, "swings": swings}
+
 
 class LiquiditySweepEngine:
     """
@@ -231,16 +271,26 @@ class LiquiditySweepEngine:
 
     @staticmethod
     def detect_liquidity_sweeps(
-        df: pd.DataFrame, 
-        swing_high: float, 
-        swing_low: float,
+        df: Optional[pd.DataFrame], 
+        swing_high: float = 0.0, 
+        swing_low: float = 0.0,
         lookback_candles: int = 5
     ) -> Dict[str, Any]:
         """
         Analyzes the most recent candles for institutional stop runs / liquidity grabs.
         """
-        if len(df) < 2:
-            return {"sweep_detected": False, "sweep_type": "NONE", "details": {}}
+        if df is None or df.empty or len(df) < 2 or not all(c in df.columns for c in ["open", "high", "low", "close"]):
+            return {
+                "sweep_detected": False,
+                "sweep_type": "NONE",
+                "strength": 0.0,
+                "invalidation_wick_level": 0.0,
+                "upper_wick_ratio": 0.0,
+                "lower_wick_ratio": 0.0,
+                "body_ratio": 0.0,
+                "candle_rejection": False,
+                "details": {}
+            }
 
         effective_lookback = min(len(df), lookback_candles)
         recent_df = df.tail(effective_lookback)
@@ -251,9 +301,22 @@ class LiquiditySweepEngine:
         c_low = float(latest["low"])
         c_close = float(latest["close"])
 
+        if any(np.isnan(v) for v in (c_open, c_high, c_low, c_close)):
+            return {
+                "sweep_detected": False,
+                "sweep_type": "NONE",
+                "strength": 0.0,
+                "invalidation_wick_level": 0.0,
+                "upper_wick_ratio": 0.0,
+                "lower_wick_ratio": 0.0,
+                "body_ratio": 0.0,
+                "candle_rejection": False,
+                "details": {}
+            }
+
         total_range = max(c_high - c_low, 1e-6)
-        upper_wick = c_high - max(c_open, c_close)
-        lower_wick = min(c_open, c_close) - c_low
+        upper_wick = max(0.0, c_high - max(c_open, c_close))
+        lower_wick = max(0.0, min(c_open, c_close) - c_low)
         body = abs(c_close - c_open)
 
         upper_wick_ratio = upper_wick / total_range
@@ -262,21 +325,23 @@ class LiquiditySweepEngine:
         bsl_sweep = False
         bsl_strength = 0.0
         
-        for _, row in recent_df.iterrows():
-            if row["high"] > swing_high and latest["close"] < swing_high:
-                bsl_sweep = True
-                overshoot_pct = ((row["high"] - swing_high) / swing_high) * 100
-                bsl_strength = min(1.0, (upper_wick_ratio * 0.7) + (overshoot_pct * 0.3))
-                break
+        if swing_high > 0:
+            for _, row in recent_df.iterrows():
+                if row["high"] > swing_high and latest["close"] < swing_high:
+                    bsl_sweep = True
+                    overshoot_pct = ((row["high"] - swing_high) / max(swing_high, 1e-8)) * 100
+                    bsl_strength = min(1.0, (upper_wick_ratio * 0.7) + (overshoot_pct * 0.3))
+                    break
 
         ssl_sweep = False
         ssl_strength = 0.0
-        for _, row in recent_df.iterrows():
-            if row["low"] < swing_low and latest["close"] > swing_low:
-                ssl_sweep = True
-                undershoot_pct = ((swing_low - row["low"]) / swing_low) * 100
-                ssl_strength = min(1.0, (lower_wick_ratio * 0.7) + (undershoot_pct * 0.3))
-                break
+        if swing_low > 0:
+            for _, row in recent_df.iterrows():
+                if row["low"] < swing_low and latest["close"] > swing_low:
+                    ssl_sweep = True
+                    undershoot_pct = ((swing_low - row["low"]) / max(swing_low, 1e-8)) * 100
+                    ssl_strength = min(1.0, (lower_wick_ratio * 0.7) + (undershoot_pct * 0.3))
+                    break
 
         sweep_type = "NONE"
         detected = False
@@ -317,6 +382,11 @@ class LiquiditySweepEngine:
                                 (sweep_type == "BEARISH_BSL_SWEEP" and upper_wick_ratio > 0.35)
         }
 
+    @classmethod
+    def evaluate(cls, df: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
+        swings = FibonacciEngine.identify_swing_points(df)
+        return cls.detect_liquidity_sweeps(df, swings["swing_high"], swings["swing_low"])
+
 
 class MultiTimeframeEngine:
     """
@@ -328,19 +398,21 @@ class MultiTimeframeEngine:
 
     @staticmethod
     def evaluate_multi_timeframe(
-        htf_bias: str,
-        itf_structure: str,
-        itf_fib_status: Dict[str, Any],
-        ltf_sweep: Dict[str, Any],
-        signal_proposal: str
+        htf_bias: str = "BULLISH",
+        itf_structure: str = "BULLISH",
+        itf_fib_status: Optional[Dict[str, Any]] = None,
+        ltf_sweep: Optional[Dict[str, Any]] = None,
+        signal_proposal: str = "BUY"
     ) -> Dict[str, Any]:
         """
         Synchronous MTF Gatekeeper:
         Trade passes ONLY if HTF Bias aligns with ITF Fibonacci Zone and LTF Liquidity Trigger.
         """
-        htf_bias = htf_bias.upper()
-        itf_structure = itf_structure.upper()
-        signal_proposal = signal_proposal.upper()
+        htf_bias = (htf_bias or "NEUTRAL").upper()
+        itf_structure = (itf_structure or "RANGING").upper()
+        signal_proposal = (signal_proposal or "HOLD").upper()
+        itf_fib_status = itf_fib_status or {}
+        ltf_sweep = ltf_sweep or {}
 
         passed_htf = False
         passed_itf = False
@@ -392,6 +464,8 @@ class MultiTimeframeEngine:
             "confluence_status": "FULL_ALIGNMENT" if all_confirmed else "MISALIGNED"
         }
 
+    evaluate = evaluate_multi_timeframe
+
 
 class RiskRewardEngine:
     """
@@ -410,11 +484,11 @@ class RiskRewardEngine:
     @classmethod
     def calculate_trade_levels(
         cls,
-        signal: str,
-        entry_price: float,
-        atr: float,
-        fib_matrix: Dict[str, Any],
-        sweep_data: Dict[str, Any],
+        signal: str = "BUY",
+        entry_price: float = 100.0,
+        atr: float = 1.0,
+        fib_matrix: Optional[Dict[str, Any]] = None,
+        sweep_data: Optional[Dict[str, Any]] = None,
         account_balance: float = 10000.0,
         risk_per_trade_pct: float = 1.5,
         win_rate_estimate: float = 0.58
@@ -422,9 +496,12 @@ class RiskRewardEngine:
         """
         Calculates exact mathematical entry, stop loss, take profit targets, RRR, and position size.
         """
-        signal = signal.upper()
-        if entry_price <= 0 or atr <= 0:
-            return {"valid_trade": False, "reason": "Invalid entry or ATR value"}
+        signal = (signal or "HOLD").upper()
+        fib_matrix = fib_matrix or {}
+        sweep_data = sweep_data or {}
+
+        if entry_price is None or atr is None or np.isnan(float(entry_price)) or np.isnan(float(atr)) or entry_price <= 0 or atr <= 0:
+            return {"valid_trade": False, "rrr": 0.0, "reason": "Invalid entry or ATR value"}
 
         atr_buffer = atr * 0.20
         ote = fib_matrix.get("ote_zone", {})
@@ -477,7 +554,7 @@ class RiskRewardEngine:
             calculated_rrr = reward_distance / risk_distance
 
         else:
-            return {"valid_trade": False, "reason": f"Signal {signal} is not executable"}
+            return {"valid_trade": False, "rrr": 0.0, "reason": f"Signal {signal} is not executable"}
 
         calculated_rrr = round(calculated_rrr, 2)
         valid_rrr = calculated_rrr >= cls.MIN_REQUIRED_RRR
@@ -509,6 +586,8 @@ class RiskRewardEngine:
             "kelly_fraction": round(quarter_kelly_pct, 4),
             "rejection_reason": None if valid_rrr else f"Calculated RRR ({calculated_rrr}:1) is below strict institutional threshold ({cls.MIN_REQUIRED_RRR}:1)"
         }
+
+    evaluate = calculate_trade_levels
 
 
 class DeepSeekR1QuantEngine:
@@ -606,8 +685,8 @@ Respond in the following STRICT JSON format after your chain-of-thought:
 
     def analyze_market(
         self,
-        symbol: str,
-        df_ltf: pd.DataFrame,
+        symbol: str = "BTC/USDT",
+        df_ltf: Optional[pd.DataFrame] = None,
         df_itf: Optional[pd.DataFrame] = None,
         df_htf: Optional[pd.DataFrame] = None,
         atr: Optional[float] = None,
@@ -621,11 +700,28 @@ Respond in the following STRICT JSON format after your chain-of-thought:
         3. Multi-Timeframe Confirmation
         4. Strict 1:3+ Risk/Reward Ratio Gatekeeper
         """
-        if df_ltf.empty or len(df_ltf) < 10:
+        if isinstance(symbol, pd.DataFrame) and df_ltf is None:
+            df_ltf = symbol
+            symbol = "BTC/USDT"
+
+        if df_ltf is None or df_ltf.empty or len(df_ltf) < 10:
             return {
+                "agent": "DeepSeek-R1 Institutional Quant Engine",
+                "symbol": symbol,
                 "signal": "HOLD",
+                "action": "HOLD",
+                "final_signal": "HOLD",
+                "candidate_signal": "HOLD",
                 "confidence": 0.0,
-                "reason": "Insufficient OHLCV data for quantitative analysis"
+                "edge_quality": "INSUFFICIENT_DATA",
+                "fibonacci_matrix": {},
+                "fibonacci_status": {"in_ote": False, "in_golden_pocket": False, "zone_status": "NONE"},
+                "liquidity_sweep": {"sweep_detected": False, "sweep_type": "NONE", "strength": 0.0},
+                "multi_timeframe": {"mtf_confirmed": False, "mtf_score": 0.0, "confluence_status": "MISALIGNED"},
+                "risk_reward": {"valid_trade": False, "rrr": 0.0},
+                "rationale": "Insufficient OHLCV data for quantitative analysis",
+                "reason": "Insufficient OHLCV data for quantitative analysis",
+                "rejection_notes": ["Insufficient OHLCV data"]
             }
 
         if df_itf is None or df_itf.empty:
@@ -634,9 +730,14 @@ Respond in the following STRICT JSON format after your chain-of-thought:
             df_htf = df_itf
 
         current_price = float(df_ltf["close"].iloc[-1])
-        if atr is None or atr <= 0:
-            high_low = df_ltf["high"] - df_ltf["low"]
+        if np.isnan(current_price) or current_price <= 0:
+            current_price = 100.0
+
+        if atr is None or np.isnan(float(atr)) or atr <= 0:
+            high_low = (df_ltf["high"] - df_ltf["low"]).abs().dropna()
             atr = float(high_low.tail(14).mean()) if not high_low.empty else current_price * 0.01
+            if np.isnan(atr) or atr <= 0:
+                atr = current_price * 0.01
 
         itf_swings = self.fib_engine.identify_swing_points(df_itf, window=4)
         htf_swings = self.fib_engine.identify_swing_points(df_htf, window=6)
@@ -725,6 +826,8 @@ Respond in the following STRICT JSON format after your chain-of-thought:
         return {
             "agent": "DeepSeek-R1 Institutional Quant Engine",
             "symbol": symbol,
+            "signal": final_signal,
+            "action": final_signal,
             "final_signal": final_signal,
             "candidate_signal": candidate_signal,
             "confidence": confidence,
@@ -737,3 +840,12 @@ Respond in the following STRICT JSON format after your chain-of-thought:
             "rationale": rationale,
             "rejection_notes": rejection_notes
         }
+
+    def generate_signal(self, df: Optional[pd.DataFrame] = None, symbol: str = "BTC/USDT") -> Dict[str, Any]:
+        return self.analyze_market(symbol=symbol, df_ltf=df)
+
+    calculate_signals = generate_signal
+    get_signal = generate_signal
+    evaluate = generate_signal
+    predict = generate_signal
+

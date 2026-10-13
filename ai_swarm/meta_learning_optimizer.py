@@ -8,7 +8,7 @@ import time
 import json
 import logging
 import numpy as np
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger("OmniTrade.MetaLearning")
 
@@ -59,14 +59,23 @@ class MetaLearningOptimizer:
         if len(self.optimization_logs) > 50:
             self.optimization_logs.pop(0)
 
-    def optimize_from_trade_results(self, trade_history: List[Dict[str, Any]], current_win_rate: float) -> Dict[str, Any]:
+    def optimize_from_trade_results(
+        self,
+        trade_history: Optional[List[Dict[str, Any]]] = None,
+        current_win_rate: float = 55.0
+    ) -> Dict[str, Any]:
         """
         Performs an automated gradient update on model weights based on rolling win-rate and realized PnL.
         """
         self.iteration_count += 1
-        
+        try:
+            win_rate = float(current_win_rate) if current_win_rate is not None and not np.isnan(float(current_win_rate)) else 50.0
+        except (ValueError, TypeError):
+            win_rate = 50.0
+        if win_rate <= 0:
+            win_rate = 50.0
+
         # Calculate recent performance factor
-        win_rate = current_win_rate if current_win_rate > 0 else 50.0
         pnl_boost = 1.0 + ((win_rate - 50.0) / 100.0)
 
         # Dynamic Bayesian weight update with softmax normalization
@@ -121,3 +130,13 @@ class MetaLearningOptimizer:
     def get_weights(self) -> Dict[str, float]:
         """Returns the current model consensus weights."""
         return dict(self.weights)
+
+    def evaluate(self, trade_history: Optional[List[Dict[str, Any]]] = None, current_win_rate: float = 55.0) -> Dict[str, Any]:
+        return self.optimize_from_trade_results(trade_history=trade_history, current_win_rate=current_win_rate)
+
+    def run(self, trade_history: Optional[List[Dict[str, Any]]] = None, current_win_rate: float = 55.0) -> Dict[str, Any]:
+        return self.optimize_from_trade_results(trade_history=trade_history, current_win_rate=current_win_rate)
+
+    def predict(self) -> Dict[str, Any]:
+        return self.get_summary()
+

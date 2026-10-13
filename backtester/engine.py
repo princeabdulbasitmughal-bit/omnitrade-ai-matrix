@@ -1,7 +1,8 @@
 import logging
+import math
 import pandas as pd
 import numpy as np
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from strategies.indicators import TechnicalIndicators
 from strategies.smart_money_concepts import SmartMoneyConcepts
 from backtester.metrics import PerformanceMetrics
@@ -9,34 +10,53 @@ from config.settings import Config
 
 logger = logging.getLogger("OmniTrade.Backtester")
 
+
 class BacktestEngine:
     def __init__(self, initial_capital: float = 10000.0, fee_pct: float = 0.00075, slippage_pct: float = 0.0005):
-        self.initial_capital = initial_capital
-        self.fee_pct = fee_pct
-        self.slippage_pct = slippage_pct
+        self.initial_capital = float(initial_capital) if initial_capital and initial_capital > 0 else 10000.0
+        self.fee_pct = float(fee_pct) if fee_pct is not None and fee_pct >= 0 else 0.00075
+        self.slippage_pct = float(slippage_pct) if slippage_pct is not None and slippage_pct >= 0 else 0.0005
 
-    def run(self, df: pd.DataFrame, symbol: str = "BTC/USDT") -> Dict[str, Any]:
+    def run(self, df: Optional[pd.DataFrame] = None, symbol: str = "BTC/USDT") -> Dict[str, Any]:
         """
         Executes backtest on historical OHLCV data.
         Combines EMA trend alignment, RSI momentum, SuperTrend, and Smart Money Concepts.
         """
-        if df.empty or len(df) < 30:
-            return {"error": "Insufficient historical data for backtesting"}
+        required = {"open", "high", "low", "close", "volume"}
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty or len(df) < 2 or not required.issubset(df.columns):
+            base_metrics = PerformanceMetrics.calculate([], initial_capital=self.initial_capital)
+            base_metrics["symbol"] = symbol
+            base_metrics["bars_analyzed"] = 0 if (df is None or not isinstance(df, pd.DataFrame)) else len(df)
+            base_metrics["trades_list"] = []
+            base_metrics["error"] = "Insufficient historical data for backtesting"
+            return base_metrics
 
         df_calc = TechnicalIndicators.compute_all(df)
-        trades: List[Dict[str, Any]] = []
+        if df_calc.empty:
+            base_metrics = PerformanceMetrics.calculate([], initial_capital=self.initial_capital)
+            base_metrics["symbol"] = symbol
+            base_metrics["bars_analyzed"] = 0
+            base_metrics["trades_list"] = []
+            base_metrics["error"] = "Insufficient historical data for backtesting"
+            return base_metrics
 
+        trades: List[Dict[str, Any]] = []
         capital = self.initial_capital
         position = None  # None or dict
 
-        for i in range(20, len(df_calc)):
+        start_idx = min(20, max(1, len(df_calc) - 1))
+
+        for i in range(start_idx, len(df_calc)):
             current_bar = df_calc.iloc[i]
-            prev_bar = df_calc.iloc[i - 1]
             close = float(current_bar["close"])
             high = float(current_bar["high"])
             low = float(current_bar["low"])
-            atr = float(current_bar["atr"])
-            timestamp = str(current_bar["timestamp"])
+            if math.isnan(close) or close <= 0:
+                continue
+            atr = float(current_bar.get("atr", close * 0.012))
+            if math.isnan(atr) or atr <= 0:
+                atr = max(close * 0.012, 1e-6)
+            timestamp = str(current_bar["timestamp"]) if "timestamp" in df_calc.columns else str(current_bar.name)
 
             # 1. If in position, check SL, TP, or Trailing Stop
             if position:
@@ -51,7 +71,7 @@ class BacktestEngine:
                     if low <= sl:
                         exit_p = sl * (1 - self.slippage_pct)
                         pnl = (exit_p - entry_price) * amount - (exit_p * amount * self.fee_pct)
-                        pnl_pct = ((exit_p - entry_price) / entry_price) * 100
+                        pnl_pct = ((exit_p - entry_price) / entry_price) * 100 if entry_price > 0 else 0.0
                         capital += (entry_price * amount) + pnl
                         trades.append({
                             "symbol": symbol,
@@ -70,7 +90,7 @@ class BacktestEngine:
                     elif high >= tp:
                         exit_p = tp * (1 - self.slippage_pct)
                         pnl = (exit_p - entry_price) * amount - (exit_p * amount * self.fee_pct)
-                        pnl_pct = ((exit_p - entry_price) / entry_price) * 100
+                        pnl_pct = ((exit_p - entry_price) / entry_price) * 100 if entry_price > 0 else 0.0
                         capital += (entry_price * amount) + pnl
                         trades.append({
                             "symbol": symbol,
@@ -98,7 +118,7 @@ class BacktestEngine:
                     if high >= sl:
                         exit_p = sl * (1 + self.slippage_pct)
                         pnl = (entry_price - exit_p) * amount - (exit_p * amount * self.fee_pct)
-                        pnl_pct = ((entry_price - exit_p) / entry_price) * 100
+                        pnl_pct = ((entry_price - exit_p) / entry_price) * 100 if entry_price > 0 else 0.0
                         capital += (entry_price * amount) + pnl
                         trades.append({
                             "symbol": symbol,
@@ -117,7 +137,7 @@ class BacktestEngine:
                     elif low <= tp:
                         exit_p = tp * (1 + self.slippage_pct)
                         pnl = (entry_price - exit_p) * amount - (exit_p * amount * self.fee_pct)
-                        pnl_pct = ((entry_price - exit_p) / entry_price) * 100
+                        pnl_pct = ((entry_price - exit_p) / entry_price) * 100 if entry_price > 0 else 0.0
                         capital += (entry_price * amount) + pnl
                         trades.append({
                             "symbol": symbol,
@@ -134,20 +154,20 @@ class BacktestEngine:
 
             # 2. If no position, evaluate entry conditions
             if not position and capital > 500:
-                rsi = current_bar["rsi"]
-                super_bull = current_bar["supertrend_dir"]
-                macd_hist = current_bar["macd_hist"]
-                ema_20 = current_bar["ema_20"]
-                ema_50 = current_bar["ema_50"]
+                rsi = float(current_bar.get("rsi", 50.0))
+                super_bull = bool(current_bar.get("supertrend_dir", False))
+                macd_hist = float(current_bar.get("macd_hist", 0.0))
+                ema_20 = float(current_bar.get("ema_20", close))
+                ema_50 = float(current_bar.get("ema_50", close))
 
                 # Buy Condition: SuperTrend Bullish + MACD Hist > 0 + EMA20 > EMA50 + RSI between 45 and 68
                 if super_bull and macd_hist > 0 and ema_20 > ema_50 and 42 < rsi < 70:
                     entry_p = close * (1 + self.slippage_pct)
-                    sl_dist = 1.5 * atr
+                    sl_dist = max(1.5 * atr, entry_p * 0.002, 1e-6)
                     sl_p = entry_p - sl_dist
-                    tp_p = entry_p + (2.5 * sl_dist) # 1:2.5 Risk-to-Reward
+                    tp_p = entry_p + (2.5 * sl_dist)  # 1:2.5 Risk-to-Reward
 
-                    risk_amount = capital * 0.015 # Risk 1.5% of capital
+                    risk_amount = capital * 0.015  # Risk 1.5% of capital
                     amount = risk_amount / sl_dist
                     max_alloc = (capital * 0.3) / entry_p
                     amount = min(amount, max_alloc)
@@ -169,7 +189,7 @@ class BacktestEngine:
                 # Sell/Short Condition: SuperTrend Bearish + MACD Hist < 0 + EMA20 < EMA50 + RSI between 30 and 58
                 elif not super_bull and macd_hist < 0 and ema_20 < ema_50 and 30 < rsi < 58:
                     entry_p = close * (1 - self.slippage_pct)
-                    sl_dist = 1.5 * atr
+                    sl_dist = max(1.5 * atr, entry_p * 0.002, 1e-6)
                     sl_p = entry_p + sl_dist
                     tp_p = entry_p - (2.5 * sl_dist)
 
@@ -200,19 +220,29 @@ class BacktestEngine:
             entry_price = position["entry_price"]
             amount = position["amount"]
             pnl = (last_close - entry_price) * amount if side == "BUY" else (entry_price - last_close) * amount
+            last_ts = str(last_bar["timestamp"]) if "timestamp" in df_calc.columns else str(last_bar.name)
             trades.append({
                 "symbol": symbol,
                 "side": side,
                 "entry_price": entry_price,
                 "exit_price": last_close,
                 "pnl": round(pnl, 2),
-                "pnl_pct": round(((last_close - entry_price) / entry_price * 100), 2) if side == "BUY" else round(((entry_price - last_close) / entry_price * 100), 2),
+                "pnl_pct": round(((last_close - entry_price) / entry_price * 100), 2) if (side == "BUY" and entry_price > 0) else (round(((entry_price - last_close) / entry_price * 100), 2) if entry_price > 0 else 0.0),
                 "exit_reason": "BACKTEST_END",
-                "timestamp": str(last_bar["timestamp"])
+                "timestamp": last_ts
             })
 
         metrics = PerformanceMetrics.calculate(trades, initial_capital=self.initial_capital)
         metrics["symbol"] = symbol
         metrics["bars_analyzed"] = len(df_calc)
         metrics["trades_list"] = trades
+        if len(df) < 30:
+            metrics["warning"] = "Small dataset (<30 bars) analyzed"
         return metrics
+
+    def evaluate(self, df: Optional[pd.DataFrame] = None, symbol: str = "BTC/USDT") -> Dict[str, Any]:
+        return self.run(df=df, symbol=symbol)
+
+    def run_simulation(self, df: Optional[pd.DataFrame] = None, symbol: str = "BTC/USDT") -> Dict[str, Any]:
+        return self.run(df=df, symbol=symbol)
+

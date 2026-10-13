@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchMT5Data();
   fetchRealMarketData();
   fetchLiveGatewayStatus();
+  fetchAgenticCouncilData();
   initBinanceMarketIntelligence();
 });
 
@@ -658,22 +659,6 @@ async function closePosition(symbol) {
   }
 }
 
-async function toggleTradingMode(mode) {
-  const autoPilotCheck = document.getElementById("autoPilotCheck");
-  const autoPilot = autoPilotCheck ? autoPilotCheck.checked : true;
-  const res = await fetch("/api/mode", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode: mode, auto_trade: autoPilot })
-  });
-  if (res.ok) {
-    const pBtn = document.getElementById("btnPaperMode");
-    const lBtn = document.getElementById("btnLiveMode");
-    if (pBtn) pBtn.className = `mode-btn ${mode === 'paper' ? 'active' : ''}`;
-    if (lBtn) lBtn.className = `mode-btn ${mode === 'live' ? 'active' : ''}`;
-  }
-}
-
 async function toggleAutoPilot() {
   const autoPilotCheck = document.getElementById("autoPilotCheck");
   const autoPilot = autoPilotCheck ? autoPilotCheck.checked : true;
@@ -691,6 +676,27 @@ function changeAsset() {
   if (select) {
     currentSymbol = select.value;
     fetchInitialAnalysis();
+  }
+}
+
+function selectSymbol(symbol) {
+  if (!symbol) return;
+  currentSymbol = symbol;
+  const select = document.getElementById("assetSelect");
+  if (select) {
+    let exists = Array.from(select.options).some(opt => opt.value === symbol);
+    if (!exists) {
+      const opt = document.createElement("option");
+      opt.value = symbol;
+      opt.text = symbol;
+      select.appendChild(opt);
+    }
+    select.value = symbol;
+  }
+  fetchInitialAnalysis();
+  const chartEl = document.getElementById("tradingviewChart");
+  if (chartEl) {
+    chartEl.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 }
 
@@ -730,6 +736,7 @@ function switchTab(tabId) {
   if (tabId === 'realDataTab') { fetchRealMarketData(); fetchLiveGatewayStatus(); }
   if (tabId === 'whiteLabelTab') fetchCommercialOverview();
   if (tabId === 'investorPitchTab') fetchInvestorDossier();
+  if (tabId === 'agenticCouncilTab') fetchAgenticCouncilData();
 }
 
 // 11. 1-Click Backtest Runner
@@ -1805,12 +1812,13 @@ async function triggerMT5AICycle() {
 
 function renderMT5Account(acc) {
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-  setEl("mt5ConnStatus", acc.connection_status === "CONNECTED" ? "CONNECTED TO MT5" : "DISCONNECTED");
+  setEl("mt5ConnStatus", (acc.connection_status === "CONNECTED" || acc.connected) ? "CONNECTED TO MT5" : "DISCONNECTED");
   setEl("mt5BrokerName", acc.broker || "IC Markets Global");
   setEl("mt5ServerName", acc.server || "ICMarketsSC-Live01");
   setEl("mt5LoginNum", acc.login || "88921045");
   setEl("mt5PingVal", `${acc.ping_ms || 3.8} ms`);
-  setEl("mt5LeverageVal", acc.leverage || "1:500");
+  const levStr = String(acc.leverage || "1:500");
+  setEl("mt5LeverageVal", levStr.startsWith("1:") ? levStr : `1:${levStr}`);
   setEl("mt5BuildVal", acc.terminal_version || "Build 4153");
 
   setEl("mt5BalanceVal", `$${(acc.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
@@ -1954,7 +1962,10 @@ async function executeMT5Order(action) {
   }
 }
 
-function renderMT5Positions(positions) {
+function renderMT5Positions(positionsData) {
+  const positions = Array.isArray(positionsData)
+    ? positionsData
+    : (positionsData && Array.isArray(positionsData.positions) ? positionsData.positions : []);
   const tbody = document.getElementById("mt5PositionsTableBody");
   const countEl = document.getElementById("mt5OpenCount");
   const totalPnlBadge = document.getElementById("mt5TotalPosPnl");
@@ -1962,7 +1973,7 @@ function renderMT5Positions(positions) {
   if (countEl) countEl.innerText = positions.length;
 
   let totalFloating = 0;
-  positions.forEach(p => { totalFloating += (p.profit_usd || 0); });
+  positions.forEach(p => { totalFloating += (p.profit_usd ?? p.floating_pnl ?? 0); });
 
   if (totalPnlBadge) {
     totalPnlBadge.innerText = `${totalFloating >= 0 ? '+' : ''}$${totalFloating.toFixed(2)} Floating`;
@@ -1976,7 +1987,9 @@ function renderMT5Positions(positions) {
   }
 
   tbody.innerHTML = positions.map(p => {
-    const pnlClass = p.profit_usd >= 0 ? "green" : "red";
+    const profitUsd = p.profit_usd ?? p.floating_pnl ?? 0;
+    const volLots = p.volume_lots ?? p.lots ?? 0.1;
+    const pnlClass = profitUsd >= 0 ? "green" : "red";
     const sideClass = p.type === "BUY" ? "buy" : "sell";
 
     return `
@@ -1984,7 +1997,7 @@ function renderMT5Positions(positions) {
         <td style="font-family: monospace; color: #f59e0b; font-size: 0.78rem;">#${p.ticket}</td>
         <td style="font-weight: 700;">${p.symbol}</td>
         <td><span class="badge ${sideClass}">${p.type}</span></td>
-        <td style="font-family: monospace; color: #38bdf8; font-weight: 700;">${p.volume_lots} L</td>
+        <td style="font-family: monospace; color: #38bdf8; font-weight: 700;">${volLots} L</td>
         <td style="font-family: monospace;">${p.open_price}</td>
         <td style="font-family: monospace; font-weight: 600;">${p.current_price}</td>
         <td style="font-size: 0.75rem; color: #94a3b8;">SL: ${p.sl || '-'} | TP: ${p.tp || '-'}</td>
@@ -2299,20 +2312,29 @@ function renderLiveGatewayUI(gw) {
 }
 
 async function toggleTradingMode(mode) {
-  const targetMode = mode === "live" ? "REAL_LIVE" : "DEMO";
+  const isLive = mode === "live" || mode === "REAL_LIVE";
+  const targetMode = isLive ? "REAL_LIVE" : "DEMO";
+  const orderMgrMode = isLive ? "live" : "paper";
   if (targetMode === "REAL_LIVE") {
     const confirmLive = confirm("⚠️ CAUTION: You are enabling REAL LIVE TRADING GATEWAY with actual capital.\n\nAre you sure you want to route automated orders to your live broker?");
     if (!confirmLive) return;
   }
 
   try {
+    const autoPilotCheck = document.getElementById("autoPilotCheck");
+    const autoPilot = autoPilotCheck ? autoPilotCheck.checked : true;
+    await fetch("/api/mode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: orderMgrMode, auto_trade: autoPilot })
+    });
+
     const res = await fetch("/api/live-gateway/toggle-mode", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode: targetMode })
     });
     if (res.ok) {
-      const data = await res.json();
       fetchLiveGatewayStatus();
       alert(`🎯 Execution Mode changed to: ${targetMode}`);
     }
@@ -2797,6 +2819,27 @@ function executeQuickBinanceTrade(symbol) {
 // 🤖 LINKED AGENTIC AI COUNCIL & GITHUB SKILLS UI
 // ==========================================
 
+async function fetchAgenticCouncilData() {
+  try {
+    const [councilRes, aToZRes, skillsRes] = await Promise.all([
+      fetch("/api/agents/council"),
+      fetch("/api/agents/a-to-z-status"),
+      fetch("/api/skills/github-arsenal")
+    ]);
+    if (councilRes.ok) {
+      renderAgenticCouncil(await councilRes.json());
+    }
+    if (aToZRes.ok) {
+      renderAtoZPipeline(await aToZRes.json());
+    }
+    if (skillsRes.ok) {
+      renderGitHubSkillsArsenal(await skillsRes.json());
+    }
+  } catch (e) {
+    console.error("fetchAgenticCouncilData error:", e);
+  }
+}
+
 function renderAgenticCouncil(agents) {
   const container = document.getElementById("agenticCouncilGrid");
   if (!container || !agents || !agents.length) return;
@@ -2804,7 +2847,8 @@ function renderAgenticCouncil(agents) {
   container.innerHTML = agents.map(agent => {
     const latest = agent.recent_thoughts && agent.recent_thoughts.length ? agent.recent_thoughts[0] : null;
     const sig = latest ? latest.signal : "ANALYZING";
-    const conf = latest ? Math.round(latest.confidence * 100) : 75;
+    const rawConf = latest ? latest.confidence : 0.75;
+    const conf = rawConf <= 1 ? Math.round(rawConf * 100) : Math.round(rawConf);
     const thought = latest ? latest.thought : "Monitoring order flow and market microstructure...";
     const sym = latest ? latest.symbol : "GLOBAL";
     
@@ -2886,6 +2930,7 @@ function renderAtoZPipeline(pipelineData) {
       const bg = isExec ? "rgba(16, 185, 129, 0.1)" : "rgba(15, 23, 42, 0.6)";
       const border = isExec ? "#10b981" : "#334155";
       const icon = isExec ? "🚀" : "💬";
+      const logConf = log.confidence <= 1 ? Math.round(log.confidence * 100) : Math.round(log.confidence);
 
       return `
         <div style="background: ${bg}; border-left: 3px solid ${border}; border-radius: 6px; padding: 0.75rem; font-size: 0.82rem;">
@@ -2894,7 +2939,7 @@ function renderAtoZPipeline(pipelineData) {
             <span style="color: #64748b; font-size: 0.72rem;">${log.timestamp}</span>
           </div>
           <div style="color: #cbd5e1; line-height: 1.4;">${log.directive}</div>
-          <div style="margin-top: 0.25rem; font-size: 0.72rem; color: #94a3b8;">Council Confidence: <strong style="color: #f8fafc;">${Math.round(log.confidence * 100)}%</strong></div>
+          <div style="margin-top: 0.25rem; font-size: 0.72rem; color: #94a3b8;">Council Confidence: <strong style="color: #f8fafc;">${logConf}%</strong></div>
         </div>
       `;
     }).join("");
@@ -2936,6 +2981,7 @@ async function handleToggleAtoZMode() {
       body: JSON.stringify({})
     });
     const data = await res.json();
+    fetchAgenticCouncilData();
     alert(`⚡ A-to-Z Autonomous Mode is now: ${data.a_to_z_auto_trading_enabled ? "ENABLED (100% Autonomous Active)" : "PAUSED"}`);
   } catch (e) {
     console.error("Error toggling A-to-Z mode:", e);
@@ -2946,6 +2992,7 @@ async function handleRunImmediateAtoZCycle() {
   try {
     const res = await fetch("/api/agents/trigger-a-to-z-cycle", { method: "POST" });
     const data = await res.json();
+    fetchAgenticCouncilData();
     alert(`🚀 Agentic Council Cycle Executed!\n• Active Broker: ${data.active_broker}\n• Deals Opened: ${data.new_deals_opened ? data.new_deals_opened.length : 0}\n• Total Open Positions: ${data.open_positions_count}`);
   } catch (e) {
     console.error("Error running A-to-Z cycle:", e);
@@ -2961,6 +3008,7 @@ async function handleToggleGitHubSkill(skillId) {
     });
     const data = await res.json();
     if (data.status === "SUCCESS") {
+      fetchAgenticCouncilData();
       alert(`⚡ Skill [${data.skill.name}] is now ${data.skill.enabled ? "ENABLED" : "DISABLED"}`);
     }
   } catch (e) {

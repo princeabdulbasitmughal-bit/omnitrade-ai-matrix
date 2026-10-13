@@ -1,10 +1,23 @@
 import json
 import logging
+import math
 import requests
 from typing import Dict, Any, Optional
 import pandas as pd
 from config.settings import Config
+
 logger = logging.getLogger("OmniTrade.DeepSeekQuantAgent")
+
+
+def _safe_float(val: Any, default: float = 0.0) -> float:
+    if val is None or isinstance(val, (dict, list, bool)):
+        return default
+    try:
+        f = float(val)
+        return default if (math.isnan(f) or math.isinf(f)) else f
+    except (ValueError, TypeError):
+        return default
+
 
 class DeepSeekQuantAgent:
     """
@@ -24,23 +37,44 @@ class DeepSeekQuantAgent:
         self.quant_engine = DeepSeekR1QuantEngine()
 
     def analyze(
-        self, 
-        symbol: str, 
-        tech_summary: Dict[str, Any], 
-        ml_summary: Dict[str, Any],
+        self,
+        symbol: Any = "BTC/USDT",
+        tech_summary: Optional[Dict[str, Any]] = None,
+        ml_summary: Optional[Dict[str, Any]] = None,
         df: Optional[pd.DataFrame] = None,
         smc_summary: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Runs the full DeepSeek-R1 Quantitative Reasoning & Invariant Verification Pipeline.
         """
-        current_price = float(tech_summary.get("close", 0.0))
-        atr = float(tech_summary.get("atr", current_price * 0.012 if current_price > 0 else 1.0))
+        if isinstance(symbol, pd.DataFrame):
+            df = symbol
+            symbol = "BTC/USDT"
+        elif isinstance(tech_summary, pd.DataFrame):
+            df = tech_summary
+            tech_summary = None
+
+        if df is not None and isinstance(df, pd.DataFrame):
+            if tech_summary is None:
+                from strategies.indicators import TechnicalIndicators
+                tech_summary = TechnicalIndicators.get_latest_summary(df)
+            if smc_summary is None:
+                from strategies.smart_money_concepts import SmartMoneyConcepts
+                smc_summary = SmartMoneyConcepts.get_smc_summary(df)
+
+        tech_summary = tech_summary if isinstance(tech_summary, dict) else {}
+        ml_summary = ml_summary if isinstance(ml_summary, dict) else {}
+
+        current_price = _safe_float(tech_summary.get("close"), 0.0)
+        default_atr = current_price * 0.012 if current_price > 0 else 1.0
+        atr = _safe_float(tech_summary.get("atr"), default_atr)
+        if atr <= 0:
+            atr = default_atr
 
         # 1. Run deterministic quantitative analysis engine
-        if df is not None and not df.empty and len(df) >= 10:
+        if df is not None and isinstance(df, pd.DataFrame) and not df.empty and len(df) >= 10:
             quant_eval = self.quant_engine.analyze_market(
-                symbol=symbol,
+                symbol=str(symbol),
                 df_ltf=df,
                 atr=atr,
                 account_balance=getattr(Config, "INITIAL_PAPER_BALANCE", 10000.0),
@@ -48,13 +82,13 @@ class DeepSeekQuantAgent:
             )
         else:
             # Synthetic evaluation from tech_summary and smc_summary
-            bb_pct = tech_summary.get("bb_pct", 0.5)
-            ml_pred = ml_summary.get("prediction", "NEUTRAL")
-            ml_conf = ml_summary.get("confidence", 0.5)
+            bb_pct = _safe_float(tech_summary.get("bb_pct"), 0.5)
+            ml_pred = str(ml_summary.get("prediction") or "NEUTRAL").upper()
+            ml_conf = _safe_float(ml_summary.get("confidence"), 0.5)
 
             # Fibonacci and SMC extraction
-            smc = smc_summary or {}
-            market_struct = smc.get("market_structure", "RANGING")
+            smc = smc_summary if isinstance(smc_summary, dict) else {}
+            market_struct = str(smc.get("market_structure") or "RANGING")
             sweep = smc.get("liquidity_sweep")
 
             # Fallback evaluation
@@ -64,19 +98,19 @@ class DeepSeekQuantAgent:
             rrr = 3.2
 
             if "BULLISH" in market_struct or sweep == "BULLISH_SELL_SIDE_LIQUIDITY_SWEEP":
-                if bb_pct < 0.70 and ml_pred in ["BULLISH", "NEUTRAL"]:
+                if bb_pct < 0.70 and ml_pred in ["BULLISH", "NEUTRAL", "BUY"]:
                     sig = "BUY"
                     conf = min(0.92, ml_conf * 1.15)
                     edge = "HIGH"
             elif "BEARISH" in market_struct or sweep == "BEARISH_BUY_SIDE_LIQUIDITY_SWEEP":
-                if bb_pct > 0.30 and ml_pred in ["BEARISH", "NEUTRAL"]:
+                if bb_pct > 0.30 and ml_pred in ["BEARISH", "NEUTRAL", "SELL"]:
                     sig = "SELL"
                     conf = min(0.92, ml_conf * 1.15)
                     edge = "HIGH"
 
             quant_eval = {
                 "agent": "DeepSeek-R1 Institutional Quant Engine",
-                "symbol": symbol,
+                "symbol": str(symbol),
                 "final_signal": sig,
                 "candidate_signal": sig,
                 "confidence": conf,
@@ -99,7 +133,7 @@ class DeepSeekQuantAgent:
         # 2. Try LLM Chain-of-Thought generation via Ollama / DeepSeek-R1
         try:
             prompt = self.quant_engine.generate_r1_cot_prompt(
-                symbol=symbol,
+                symbol=str(symbol),
                 price=current_price,
                 htf_summary={"trend": quant_eval.get("multi_timeframe", {}).get("confluence_status", "ALIGNED"), "zone": "Active"},
                 itf_summary=quant_eval.get("fibonacci_status", {}),
@@ -118,41 +152,49 @@ class DeepSeekQuantAgent:
                     "stream": False,
                     "options": {"num_predict": 180, "temperature": 0.05}
                 },
-                timeout=3.5
+                timeout=(0.4, 1.2)
             )
             if resp.status_code == 200:
-                data = json.loads(resp.json().get("response", "{}"))
-                signal = data.get("signal", quant_eval["final_signal"]).upper()
-                confidence = float(data.get("confidence", quant_eval["confidence"]))
-                rrr_val = float(data.get("rrr", quant_eval.get("risk_reward", {}).get("rrr", 3.0)))
+                data = json.loads(resp.json().get("response", "{}") or "{}")
+                if isinstance(data, dict):
+                    signal = str(data.get("signal") or quant_eval["final_signal"]).upper()
+                    if signal not in ("BUY", "SELL", "HOLD"):
+                        signal = quant_eval["final_signal"]
+                    confidence = max(0.0, min(1.0, _safe_float(data.get("confidence"), float(quant_eval["confidence"]))))
+                    rrr_val = _safe_float(data.get("rrr"), _safe_float(quant_eval.get("risk_reward", {}).get("rrr"), 3.0))
 
-                # Enforce Strict 1:3+ RRR Invariant on LLM output
-                if rrr_val < 3.0 or not data.get("strict_rrr_passed", True):
-                    signal = "HOLD"
-                    confidence = 0.40
+                    # Enforce Strict 1:3+ RRR Invariant on LLM output
+                    if rrr_val < 3.0 or not data.get("strict_rrr_passed", True):
+                        signal = "HOLD"
+                        confidence = 0.40
 
-                return {
-                    "agent": "DeepSeek-R1 Quant Engine (CoT Live)",
-                    "signal": signal,
-                    "confidence": round(confidence, 2),
-                    "edge_quality": "INSTITUTIONAL_ALPHA" if confidence >= 0.85 else "HIGH" if signal != "HOLD" else "LOW",
-                    "fibonacci_status": data.get("fibonacci_confluence", quant_eval.get("fibonacci_status", {}).get("zone_status")),
-                    "liquidity_sweep": data.get("liquidity_sweep_verified", True),
-                    "mtf_alignment": data.get("mtf_alignment", True),
-                    "rrr": rrr_val,
-                    "risk_reward_data": quant_eval.get("risk_reward", {}),
-                    "rationale": data.get("quant_rationale", quant_eval["rationale"]),
-                    "thought_process": data.get("thought_process", "DeepSeek-R1 CoT 4-pillar algorithmic reasoning"),
-                    "status": "LIVE_GPU"
-                }
+                    return {
+                        "agent": "DeepSeek-R1 Quant Engine (CoT Live)",
+                        "signal": signal,
+                        "final_signal": signal,
+                        "action": signal,
+                        "confidence": round(confidence, 2),
+                        "edge_quality": "INSTITUTIONAL_ALPHA" if confidence >= 0.85 else "HIGH" if signal != "HOLD" else "LOW",
+                        "fibonacci_status": data.get("fibonacci_confluence", quant_eval.get("fibonacci_status", {}).get("zone_status")),
+                        "liquidity_sweep": data.get("liquidity_sweep_verified", True),
+                        "mtf_alignment": data.get("mtf_alignment", True),
+                        "rrr": rrr_val,
+                        "risk_reward_data": quant_eval.get("risk_reward", {}),
+                        "rationale": data.get("quant_rationale", quant_eval["rationale"]),
+                        "thought_process": data.get("thought_process", "DeepSeek-R1 CoT 4-pillar algorithmic reasoning"),
+                        "status": "LIVE_GPU"
+                    }
         except Exception as e:
             logger.debug(f"Ollama DeepSeek-R1 call: {e}. Executing verified deterministic quantitative fallback.")
 
         # Return verified quantitative engine evaluation
         rr = quant_eval.get("risk_reward", {})
+        sig = quant_eval["final_signal"]
         return {
             "agent": "DeepSeek-R1 Quant Engine (Deterministic Mode)",
-            "signal": quant_eval["final_signal"],
+            "signal": sig,
+            "final_signal": sig,
+            "action": sig,
             "confidence": quant_eval["confidence"],
             "edge_quality": quant_eval["edge_quality"],
             "fibonacci_status": quant_eval.get("fibonacci_status", {}).get("zone_status"),
@@ -161,5 +203,24 @@ class DeepSeekQuantAgent:
             "rrr": rr.get("rrr", 0.0),
             "risk_reward_data": rr,
             "rationale": quant_eval["rationale"],
-            "status": "DETERMINISTIC_RULES_PASSED" if quant_eval["final_signal"] != "HOLD" else "DETERMINISTIC_FILTERED"
+            "status": "DETERMINISTIC_RULES_PASSED" if sig != "HOLD" else "DETERMINISTIC_FILTERED"
         }
+
+    def evaluate(self, symbol: Any = "BTC/USDT", tech_summary: Optional[Dict[str, Any]] = None, ml_summary: Optional[Dict[str, Any]] = None, df: Optional[pd.DataFrame] = None, smc_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, tech_summary=tech_summary, ml_summary=ml_summary, df=df, smc_summary=smc_summary)
+
+    def get_signal(self, symbol: Any = "BTC/USDT", tech_summary: Optional[Dict[str, Any]] = None, ml_summary: Optional[Dict[str, Any]] = None, df: Optional[pd.DataFrame] = None, smc_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, tech_summary=tech_summary, ml_summary=ml_summary, df=df, smc_summary=smc_summary)
+
+    def generate_signal(self, symbol: Any = "BTC/USDT", tech_summary: Optional[Dict[str, Any]] = None, ml_summary: Optional[Dict[str, Any]] = None, df: Optional[pd.DataFrame] = None, smc_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, tech_summary=tech_summary, ml_summary=ml_summary, df=df, smc_summary=smc_summary)
+
+    def calculate_signals(self, symbol: Any = "BTC/USDT", tech_summary: Optional[Dict[str, Any]] = None, ml_summary: Optional[Dict[str, Any]] = None, df: Optional[pd.DataFrame] = None, smc_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, tech_summary=tech_summary, ml_summary=ml_summary, df=df, smc_summary=smc_summary)
+
+    def predict(self, symbol: Any = "BTC/USDT", tech_summary: Optional[Dict[str, Any]] = None, ml_summary: Optional[Dict[str, Any]] = None, df: Optional[pd.DataFrame] = None, smc_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, tech_summary=tech_summary, ml_summary=ml_summary, df=df, smc_summary=smc_summary)
+
+    def run(self, symbol: Any = "BTC/USDT", tech_summary: Optional[Dict[str, Any]] = None, ml_summary: Optional[Dict[str, Any]] = None, df: Optional[pd.DataFrame] = None, smc_summary: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        return self.analyze(symbol=symbol, tech_summary=tech_summary, ml_summary=ml_summary, df=df, smc_summary=smc_summary)
+

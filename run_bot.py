@@ -19,7 +19,14 @@ from strategies.strategy_orchestrator import StrategyOrchestrator
 from backtester.engine import BacktestEngine
 from backtester.monte_carlo import MonteCarloSimulator
 
-console = Console()
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+console = Console(legacy_windows=False)
 
 def run_scan():
     console.print(Panel.fit(
