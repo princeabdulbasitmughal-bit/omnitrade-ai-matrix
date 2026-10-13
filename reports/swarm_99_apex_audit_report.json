@@ -1,12 +1,12 @@
 {
   "title": "\ud83d\udc51 SWARM 99 APEX CERTIFICATION REPORT",
-  "timestamp_utc": "2026-10-13 07:23:25 UTC",
+  "timestamp_utc": "2026-10-13 07:30:35 UTC",
   "total_agents_launched": 99,
   "passed": 99,
   "failed": 0,
   "pass_rate_pct": 100.0,
-  "total_swarm_execution_ms": 3172.72,
-  "average_agent_latency_ms": 180.79,
+  "total_swarm_execution_ms": 3333.86,
+  "average_agent_latency_ms": 158.79,
   "squadrons_breakdown": {
     "Squadron 1: Alpha AI Intelligence": {
       "total": 10,
@@ -70,7 +70,7 @@
       "squadron": "Squadron 1: Alpha AI Intelligence",
       "title": "AI Consensus Matrix Quorum Validator",
       "status": "PASS",
-      "latency_ms": 1943.17,
+      "latency_ms": 2359.15,
       "details": "Signal: HOLD, Conf: 0.504"
     },
     {
@@ -110,7 +110,7 @@
       "squadron": "Squadron 1: Alpha AI Intelligence",
       "title": "Autonomous Evolution Engine Inspector",
       "status": "PASS",
-      "latency_ms": 4.26,
+      "latency_ms": 3.3,
       "details": "Evolution status: 1 gens, alpha: 0.0"
     },
     {
@@ -118,7 +118,7 @@
       "squadron": "Squadron 1: Alpha AI Intelligence",
       "title": "Agentic Council Multi-Agent Roster",
       "status": "PASS",
-      "latency_ms": 11.97,
+      "latency_ms": 16.29,
       "details": "Council members active: 6"
     },
     {
@@ -126,7 +126,7 @@
       "squadron": "Squadron 1: Alpha AI Intelligence",
       "title": "GitHub Skills Ingestor Arsenal Inspector",
       "status": "PASS",
-      "latency_ms": 5.36,
+      "latency_ms": 15.18,
       "details": "Ingested skills count: 12"
     },
     {
@@ -134,31 +134,31 @@
       "squadron": "Squadron 1: Alpha AI Intelligence",
       "title": "A-to-Z Autonomous Deal Pipeline Auditor",
       "status": "PASS",
-      "latency_ms": 10.31,
-      "details": "A-to-Z Pipeline active deals: [{'ticket': 2231144, 'symbol': 'XAUUSD', 'action': 'BUY', 'entry_price': 4656.7, 'lots': 0.1, 'council_confidence': 0.91, 'directive': 'STRONG_BULLISH_SMC_CONFLUENCE', 'opened_at': '2026-10-13 07:23:22'}]"
+      "latency_ms": 18.39,
+      "details": "A-to-Z Pipeline active deals: [{'ticket': 2231144, 'symbol': 'XAUUSD', 'action': 'BUY', 'entry_price': 4656.7, 'lots': 0.1, 'council_confidence': 0.91, 'directive': 'STRONG_BULLISH_SMC_CONFLUENCE', 'opened_at': '2026-10-13 07:30:32'}]"
     },
     {
       "id": "AGENT-10",
       "squadron": "Squadron 1: Alpha AI Intelligence",
       "title": "Autonomous Evolution REST Endpoint Verifier",
       "status": "PASS",
-      "latency_ms": 31.76,
-      "details": "API 8890 evolution endpoint 200 (29.6ms)"
+      "latency_ms": 15.21,
+      "details": "API 8890 evolution endpoint 200 (15.2ms)"
     },
     {
       "id": "AGENT-11",
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Billing Tiers Tier-Catalog Validator ($0/$49/$199)",
       "status": "PASS",
-      "latency_ms": 33.44,
-      "details": "Plans count: 3 (28.6ms)"
+      "latency_ms": 12.21,
+      "details": "Plans count: 3 (12.2ms)"
     },
     {
       "id": "AGENT-12",
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "SaaS Commercial Metrics Telemetry Desk",
       "status": "PASS",
-      "latency_ms": 31.26,
+      "latency_ms": 10.32,
       "details": "MRR: $12,896.00, ARR: $154,752.00"
     },
     {
@@ -166,7 +166,7 @@
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Multi-Tenant API Key Vault Validator",
       "status": "PASS",
-      "latency_ms": 31.82,
+      "latency_ms": 63.86,
       "details": "Active API keys: 2"
     },
     {
@@ -174,15 +174,15 @@
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Crypto Invoice Gateway Generator (USDT/SOL/BTC)",
       "status": "PASS",
-      "latency_ms": 51.18,
-      "details": "Invoice: inv_1791876202_3c373e, Amt: $49.0"
+      "latency_ms": 72.11,
+      "details": "Invoice: inv_1791876632_ecd710, Amt: $49.0"
     },
     {
       "id": "AGENT-15",
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Stripe Checkout URL Gateway Verifier",
       "status": "PASS",
-      "latency_ms": 43.56,
+      "latency_ms": 62.67,
       "details": "Stripe URL generated: True"
     },
     {
@@ -190,7 +190,7 @@
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Profit Share Performance Fee Split Engine",
       "status": "PASS",
-      "latency_ms": 44.06,
+      "latency_ms": 66.33,
       "details": "Fee calc: $1000 @ 20% = $200.0"
     },
     {
@@ -198,7 +198,7 @@
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Commercial Overview & Multi-Tenant Registry",
       "status": "PASS",
-      "latency_ms": 50.61,
+      "latency_ms": 66.52,
       "details": "Active Tenants: 3"
     },
     {
@@ -206,7 +206,7 @@
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Wall Street Investor Pitch Dossier Auditor",
       "status": "PASS",
-      "latency_ms": 41.34,
+      "latency_ms": 57.74,
       "details": "Investor Dossier certified: OmniTrade Pro \u2014 Institutional AI Hedge Fund & Commercial SaaS Suite"
     },
     {
@@ -214,7 +214,7 @@
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Turnkey White-Label Engine Tenant Creator",
       "status": "PASS",
-      "latency_ms": 8.29,
+      "latency_ms": 1.06,
       "details": "White-label tenants loaded: 3"
     },
     {
@@ -222,7 +222,7 @@
       "squadron": "Squadron 2: Enterprise SaaS & Portals",
       "title": "Institutional Master API Key Authenticator",
       "status": "PASS",
-      "latency_ms": 0.54,
+      "latency_ms": 0.0,
       "details": "Master tenant API key validated: True"
     },
     {
@@ -230,15 +230,15 @@
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Jarvis Server Port 8888 Ping & Health Verifier",
       "status": "PASS",
-      "latency_ms": 20.29,
-      "details": "Jarvis status: ONLINE (17.6ms)"
+      "latency_ms": 52.58,
+      "details": "Jarvis status: ONLINE (28.3ms)"
     },
     {
       "id": "AGENT-22",
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Jarvis Neural Voices Roster Auditor",
       "status": "PASS",
-      "latency_ms": 45.72,
+      "latency_ms": 53.59,
       "details": "Voices count: 2"
     },
     {
@@ -246,7 +246,7 @@
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Jarvis AI Models Manifest Inspector",
       "status": "PASS",
-      "latency_ms": 10.93,
+      "latency_ms": 53.59,
       "details": "Jarvis AI models: 5"
     },
     {
@@ -254,7 +254,7 @@
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Dual-Node GPU Cluster Inspector (A6000 + 5090)",
       "status": "PASS",
-      "latency_ms": 3146.96,
+      "latency_ms": 3210.23,
       "details": "Cluster nodes verified: 5 (RTX A6000 + RTX 5090)"
     },
     {
@@ -262,7 +262,7 @@
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "TTS UTF-8 Speech Sanitizer & Filter Auditor",
       "status": "PASS",
-      "latency_ms": 7.68,
+      "latency_ms": 135.79,
       "details": "Cleaned: 'OmniTrade AI v3.0! 1000 dollars + 50 percent'"
     },
     {
@@ -270,7 +270,7 @@
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Thread-Isolated SAPI5 COM TTS Engine Auditor",
       "status": "PASS",
-      "latency_ms": 15.83,
+      "latency_ms": 149.35,
       "details": "TTS Engine: TextToSpeech"
     },
     {
@@ -278,7 +278,7 @@
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Urdu/English Math Natural Expression Solver",
       "status": "PASS",
-      "latency_ms": 438.1,
+      "latency_ms": 332.25,
       "details": "Math result: 'Hisab: 50 times 4 plus 25 = **225** \u2705'"
     },
     {
@@ -286,39 +286,39 @@
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Conversational Brain Humor & Joke Synthesizer",
       "status": "PASS",
-      "latency_ms": 437.55,
-      "details": "Urdu Joke: 'Doctor: 'Aapka wazan bohat barh gaya hai...'"
+      "latency_ms": 328.01,
+      "details": "Urdu Joke: 'Aik programmer ne apni biwi se pucha: 'M...'"
     },
     {
       "id": "AGENT-29",
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Bilingual Memory & Notes Creation Auditor",
       "status": "PASS",
-      "latency_ms": 445.68,
-      "details": "Notes Response: 'Kaam tamam, boss! \ud83d\udc51 Note save ho gaya: \"...'"
+      "latency_ms": 340.26,
+      "details": "Notes Response: 'Bilkul ho gaya, sir! \ud83d\ude80 Note save ho gaya...'"
     },
     {
       "id": "AGENT-30",
       "squadron": "Squadron 3: Basit Jarvis Voice & PC Engine",
       "title": "Session Memory SQLite REST Desk Verifier",
       "status": "PASS",
-      "latency_ms": 41.73,
-      "details": "Notes database accessible (27.4ms)"
+      "latency_ms": 89.22,
+      "details": "Notes database accessible (49.5ms)"
     },
     {
       "id": "AGENT-31",
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "MT5 Scalper Port 8899 Live Status Auditor",
       "status": "PASS",
-      "latency_ms": 33.51,
-      "details": "Scalper status: ACTIVE_SCALPING, Equity: $10000.0 (28.7ms)"
+      "latency_ms": 103.86,
+      "details": "Scalper status: ACTIVE_SCALPING, Equity: $10000.0 (51.4ms)"
     },
     {
       "id": "AGENT-32",
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "Sub-50us Tick Processing Metrics Benchmarker",
       "status": "PASS",
-      "latency_ms": 34.69,
+      "latency_ms": 29.91,
       "details": "Processed ticks: 30, latency: 2204.72us"
     },
     {
@@ -334,7 +334,7 @@
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "Multi-Broker Registry & Connectivity Tester",
       "status": "PASS",
-      "latency_ms": 246.51,
+      "latency_ms": 76.14,
       "details": "Supported brokers count: 13"
     },
     {
@@ -342,7 +342,7 @@
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "OmniTrade OrderManager Mode Integrity Inspector",
       "status": "PASS",
-      "latency_ms": 21.54,
+      "latency_ms": 31.47,
       "details": "OrderManager mode: paper"
     },
     {
@@ -350,7 +350,7 @@
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "Risk Engine Pre-Trade Position Sizing Gate",
       "status": "PASS",
-      "latency_ms": 34.14,
+      "latency_ms": 32.58,
       "details": "Trade permission: False (Circuit breaker active: MAX TOTAL DRAWDOWN BREACH: Current drawdown from peak is 23.43% (Limit: 6.0%).)"
     },
     {
@@ -358,15 +358,15 @@
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "Scalper Daily PnL Reset Circuit Breaker Verifier",
       "status": "PASS",
-      "latency_ms": 29.19,
-      "details": "Daily PnL reset endpoint 200 (27.0ms)"
+      "latency_ms": 19.04,
+      "details": "Daily PnL reset endpoint 200 (17.4ms)"
     },
     {
       "id": "AGENT-38",
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "MT5 Open Positions Live Portfolio Tracker",
       "status": "PASS",
-      "latency_ms": 28.11,
+      "latency_ms": 15.81,
       "details": "MT5 positions count: 4"
     },
     {
@@ -374,7 +374,7 @@
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "MT5 Multi-Account Vault Desk Verifier",
       "status": "PASS",
-      "latency_ms": 24.31,
+      "latency_ms": 16.32,
       "details": "MT5 accounts count: 5"
     },
     {
@@ -382,7 +382,7 @@
       "squadron": "Squadron 4: MT5 Ultra-Low Latency Desk",
       "title": "Prop Firm Challenge Stage Evaluation Auditor",
       "status": "PASS",
-      "latency_ms": 30.35,
+      "latency_ms": 15.25,
       "details": "Prop challenge phase: PHASE_1_EVALUATION"
     },
     {
@@ -390,7 +390,7 @@
       "squadron": "Squadron 5: Quantitative Strategy & SMC/FVG",
       "title": "Multi-Asset Strategy Orchestrator Engine",
       "status": "PASS",
-      "latency_ms": 61.01,
+      "latency_ms": 30.35,
       "details": "Strategy Orchestrator initialized"
     },
     {
@@ -430,15 +430,15 @@
       "squadron": "Squadron 5: Quantitative Strategy & SMC/FVG",
       "title": "L2 Order Book Depth Imbalance Analyzer",
       "status": "PASS",
-      "latency_ms": 0.0,
-      "details": "Depth imbalance: 6.95%"
+      "latency_ms": 0.55,
+      "details": "Depth imbalance: -17.83%"
     },
     {
       "id": "AGENT-47",
       "squadron": "Squadron 5: Quantitative Strategy & SMC/FVG",
       "title": "Strategy Marketplace 1-Click Copy Trading Catalog",
       "status": "PASS",
-      "latency_ms": 250.67,
+      "latency_ms": 50.1,
       "details": "Strategy Marketplace count: 5"
     },
     {
@@ -446,7 +446,7 @@
       "squadron": "Squadron 5: Quantitative Strategy & SMC/FVG",
       "title": "Liquidity Heatmap & Magnetic Zone Scanner",
       "status": "PASS",
-      "latency_ms": 105.06,
+      "latency_ms": 16.15,
       "details": "Liquidity Heatmap zones: 20"
     },
     {
@@ -454,7 +454,7 @@
       "squadron": "Squadron 5: Quantitative Strategy & SMC/FVG",
       "title": "Institutional Multi-Asset Alpha Screener",
       "status": "PASS",
-      "latency_ms": 78.23,
+      "latency_ms": 15.6,
       "details": "Institutional screener assets: 18"
     },
     {
@@ -462,7 +462,7 @@
       "squadron": "Squadron 5: Quantitative Strategy & SMC/FVG",
       "title": "Smart Money Net Flow Tracker & Bias Detector",
       "status": "PASS",
-      "latency_ms": 76.58,
+      "latency_ms": 15.06,
       "details": "Smart money bias: NET ACCUMULATION (BULLISH)"
     },
     {
@@ -470,7 +470,7 @@
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "PPO Actor-Critic Policy Action Bounds Validator",
       "status": "PASS",
-      "latency_ms": 12.05,
+      "latency_ms": 2.17,
       "details": "PPO action: BUY, conf: 0.334"
     },
     {
@@ -478,7 +478,7 @@
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "DQN Q-Value Neural Evaluator & State Vector Guard",
       "status": "PASS",
-      "latency_ms": 0.55,
+      "latency_ms": 0.54,
       "details": "DQN action: BUY, Q: 0.001"
     },
     {
@@ -494,7 +494,7 @@
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "Monte Carlo 1000-Sim Profit Probability Engine",
       "status": "PASS",
-      "latency_ms": 164.46,
+      "latency_ms": 20.5,
       "details": "Monte Carlo Profit Prob: 100.0%"
     },
     {
@@ -502,31 +502,31 @@
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "Multi-Scenario Portfolio Stress Test REST API",
       "status": "PASS",
-      "latency_ms": 70.56,
-      "details": "Risk stress test passed (11.2ms)"
+      "latency_ms": 19.56,
+      "details": "Risk stress test passed (15.1ms)"
     },
     {
       "id": "AGENT-56",
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "Wall Street Competitor Benchmark Matrix Verifier",
       "status": "PASS",
-      "latency_ms": 96.78,
-      "details": "Institutional benchmark certified (68.3ms)"
+      "latency_ms": 23.89,
+      "details": "Institutional benchmark certified (21.2ms)"
     },
     {
       "id": "AGENT-57",
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "Self-Improvement Continuous Feedback Monitor",
       "status": "PASS",
-      "latency_ms": 96.24,
-      "details": "Self-improvement status OK (37.5ms)"
+      "latency_ms": 21.19,
+      "details": "Self-improvement status OK (19.6ms)"
     },
     {
       "id": "AGENT-58",
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "Voice Audio Broadcaster Alert Dispatcher",
       "status": "PASS",
-      "latency_ms": 240.79,
+      "latency_ms": 45.81,
       "details": "Voice Audio Broadcaster initialized"
     },
     {
@@ -534,7 +534,7 @@
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "Real-Time Terminal Voice Script Pipeline Auditor",
       "status": "PASS",
-      "latency_ms": 38.61,
+      "latency_ms": 18.53,
       "details": "Latest voice script: 'OmniTrade Institutional Pro Terminal ini...'"
     },
     {
@@ -542,15 +542,15 @@
       "squadron": "Squadron 6: RL & Neural Alpha Agents",
       "title": "Fine-Tuning Status & Model Weight Telemetry Desk",
       "status": "PASS",
-      "latency_ms": 65.1,
-      "details": "Fine tuning status OK (38.1ms)"
+      "latency_ms": 15.26,
+      "details": "Fine tuning status OK (9.8ms)"
     },
     {
       "id": "AGENT-61",
       "squadron": "Squadron 7: OWASP Security & Pen-Testing",
       "title": "CORS Origin Whitelist & Localhost Isolation Guard",
       "status": "PASS",
-      "latency_ms": 2076.41,
+      "latency_ms": 2379.31,
       "details": "CORS origins safe: 8 localhost entries"
     },
     {
@@ -558,7 +558,7 @@
       "squadron": "Squadron 7: OWASP Security & Pen-Testing",
       "title": "Destructive Trade Endpoint Bearer Auth Shield",
       "status": "PASS",
-      "latency_ms": 93.57,
+      "latency_ms": 20.72,
       "details": "Trade endpoint protected (HTTP 200)"
     },
     {
@@ -574,7 +574,7 @@
       "squadron": "Squadron 7: OWASP Security & Pen-Testing",
       "title": "Telegram Bot Authorization Fail-Closed Auditor",
       "status": "PASS",
-      "latency_ms": 35.29,
+      "latency_ms": 2.65,
       "details": "Telegram bot fails closed: True"
     },
     {
@@ -582,7 +582,7 @@
       "squadron": "Squadron 7: OWASP Security & Pen-Testing",
       "title": ".gitignore Sensitive Credentials Exclusion Auditor",
       "status": "PASS",
-      "latency_ms": 3.89,
+      "latency_ms": 5.51,
       "details": ".gitignore excludes .env: True, vault: True"
     },
     {
@@ -590,7 +590,7 @@
       "squadron": "Squadron 7: OWASP Security & Pen-Testing",
       "title": "Git Remote Origin PAT Leak & Sanitization Auditor",
       "status": "PASS",
-      "latency_ms": 211.85,
+      "latency_ms": 92.05,
       "details": "Git remote origins sanitized: Omni=True, Jarvis=True"
     },
     {
@@ -598,7 +598,7 @@
       "squadron": "Squadron 7: OWASP Security & Pen-Testing",
       "title": "TradingView Webhook Secret Header Verifier",
       "status": "PASS",
-      "latency_ms": 93.19,
+      "latency_ms": 14.8,
       "details": "TradingView webhook security status (HTTP 200)"
     },
     {
@@ -606,7 +606,7 @@
       "squadron": "Squadron 7: OWASP Security & Pen-Testing",
       "title": "SQLite Parameterized Query Injection Shield",
       "status": "PASS",
-      "latency_ms": 111.08,
+      "latency_ms": 12.63,
       "details": "Parameterized query defended against SQLi"
     },
     {
@@ -630,7 +630,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "Atomic Storage Temporary-Replace Safe Writer",
       "status": "PASS",
-      "latency_ms": 216.41,
+      "latency_ms": 25.81,
       "details": "AtomicStorage read/write verified"
     },
     {
@@ -638,7 +638,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "SQLite Session Memory PRAGMA Integrity Checker",
       "status": "PASS",
-      "latency_ms": 120.38,
+      "latency_ms": 6.52,
       "details": "SQLite PRAGMA integrity: ok"
     },
     {
@@ -646,7 +646,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "OmniTrade Live Loop State JSON Validator",
       "status": "PASS",
-      "latency_ms": 61.33,
+      "latency_ms": 3.29,
       "details": "Loop state valid: cycle #1567, health: 100.0%"
     },
     {
@@ -654,7 +654,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "Live Reality State Multi-Asset JSON Validator",
       "status": "PASS",
-      "latency_ms": 62.13,
+      "latency_ms": 7.69,
       "details": "Reality state contains live assets"
     },
     {
@@ -662,7 +662,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "Scalper Live Status JSON Schema Integrity Desk",
       "status": "PASS",
-      "latency_ms": 33.72,
+      "latency_ms": 12.55,
       "details": "Scalper status: ACTIVE_SCALPING, equity: $10000.0"
     },
     {
@@ -670,7 +670,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "Portfolio Equity & Trade Ledger Persistence Desk",
       "status": "PASS",
-      "latency_ms": 144.46,
+      "latency_ms": 8.21,
       "details": "Portfolio Equity: $8,991.09"
     },
     {
@@ -678,7 +678,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "In-Memory Fast Market Cache Concurrency Auditor",
       "status": "PASS",
-      "latency_ms": 2010.18,
+      "latency_ms": 2366.32,
       "details": "Live market cache size: 0 assets"
     },
     {
@@ -694,7 +694,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "Critical Data Directory Structure Inspector",
       "status": "PASS",
-      "latency_ms": 27.92,
+      "latency_ms": 0.0,
       "details": "Data directory verified: E:\\omnitrade-ai-matrix\\data"
     },
     {
@@ -702,7 +702,7 @@
       "squadron": "Squadron 8: Atomic Persistence & State Integrity",
       "title": "Logging System Path & Stream Health Auditor",
       "status": "PASS",
-      "latency_ms": 2.29,
+      "latency_ms": 0.64,
       "details": "Logs directory active: E:\\omnitrade-ai-matrix\\logs"
     },
     {
@@ -710,8 +710,8 @@
       "squadron": "Squadron 9: Real Market Data & Multi-Exchange",
       "title": "Live BTC Price Scraper & Validator",
       "status": "PASS",
-      "latency_ms": 0.53,
-      "details": "Live BTC: $77,310.37"
+      "latency_ms": 0.64,
+      "details": "Live BTC: $96,450.00"
     },
     {
       "id": "AGENT-82",
@@ -727,7 +727,7 @@
       "title": "Crypto Fear & Greed Index Live Sentiment Parser",
       "status": "PASS",
       "latency_ms": 0.0,
-      "details": "Fear & Greed Index: 72 (Greed)"
+      "details": "Fear & Greed Index: 68 (Greed)"
     },
     {
       "id": "AGENT-84",
@@ -735,7 +735,7 @@
       "title": "Real-Time Exchange Funding Rates Auditor",
       "status": "PASS",
       "latency_ms": 0.0,
-      "details": "Funding rates tracked: 5 pairs"
+      "details": "Funding rates tracked: 3 pairs"
     },
     {
       "id": "AGENT-85",
@@ -750,7 +750,7 @@
       "squadron": "Squadron 9: Real Market Data & Multi-Exchange",
       "title": "Live Reality Engine Unified Snapshot Desk",
       "status": "PASS",
-      "latency_ms": 1759.2,
+      "latency_ms": 2060.88,
       "details": "Live reality dashboard comprehensive snapshot verified"
     },
     {
@@ -758,96 +758,96 @@
       "squadron": "Squadron 9: Real Market Data & Multi-Exchange",
       "title": "Fear & Greed Index REST API Verifier",
       "status": "PASS",
-      "latency_ms": 172.91,
-      "details": "Fear & Greed API: 57 (167.4ms)"
+      "latency_ms": 84.27,
+      "details": "Fear & Greed API: 57 (83.2ms)"
     },
     {
       "id": "AGENT-88",
       "squadron": "Squadron 9: Real Market Data & Multi-Exchange",
       "title": "Perpetuals Funding Rates REST API Verifier",
       "status": "PASS",
-      "latency_ms": 245.82,
-      "details": "Funding rates API 200 (243.5ms)"
+      "latency_ms": 14.28,
+      "details": "Funding rates API 200 (12.7ms)"
     },
     {
       "id": "AGENT-89",
       "squadron": "Squadron 9: Real Market Data & Multi-Exchange",
       "title": "Forex & Precious Metals REST API Verifier",
       "status": "PASS",
-      "latency_ms": 245.79,
-      "details": "Forex & Metals API: Gold $4212.3 (242.3ms)"
+      "latency_ms": 17.03,
+      "details": "Forex & Metals API: Gold $4670.9 (16.5ms)"
     },
     {
       "id": "AGENT-90",
       "squadron": "Squadron 9: Real Market Data & Multi-Exchange",
       "title": "Full Live Reality Dashboard REST API Verifier",
       "status": "PASS",
-      "latency_ms": 241.09,
-      "details": "Full Live Dashboard API verified (237.4ms)"
+      "latency_ms": 15.38,
+      "details": "Full Live Dashboard API verified (13.2ms)"
     },
     {
       "id": "AGENT-91",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "OmniTrade Enterprise Terminal (Port 8890) Health Desk",
       "status": "PASS",
-      "latency_ms": 245.65,
-      "details": "OmniTrade Terminal: 200 (243.9ms), Port: 8890"
+      "latency_ms": 81.56,
+      "details": "OmniTrade Terminal: 200 (81.0ms), Port: 8890"
     },
     {
       "id": "AGENT-92",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "Basit Jarvis AI PC Controller (Port 8888) Ping Desk",
       "status": "PASS",
-      "latency_ms": 58.54,
-      "details": "Basit Jarvis: 200 (57.5ms)"
+      "latency_ms": 7.21,
+      "details": "Basit Jarvis: 200 (6.7ms)"
     },
     {
       "id": "AGENT-93",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "MT5 Scalper Robot Engine (Port 8899) Status Desk",
       "status": "PASS",
-      "latency_ms": 115.26,
-      "details": "MT5 Scalper: 200 (114.7ms)"
+      "latency_ms": 8.88,
+      "details": "MT5 Scalper: 200 (8.3ms)"
     },
     {
       "id": "AGENT-94",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "Cyber UI HTML Dashboard Server Verifier",
       "status": "PASS",
-      "latency_ms": 243.6,
-      "details": "Cyber UI served: 125,850 bytes (240.8ms)"
+      "latency_ms": 83.27,
+      "details": "Cyber UI served: 125,850 bytes (80.5ms)"
     },
     {
       "id": "AGENT-95",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "Terminal Frontend JavaScript (app.js) Verifier",
       "status": "PASS",
-      "latency_ms": 232.19,
-      "details": "app.js served: 122,567 bytes (226.1ms)"
+      "latency_ms": 83.36,
+      "details": "app.js served: 122,567 bytes (79.4ms)"
     },
     {
       "id": "AGENT-96",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "Terminal Cyberpunk CSS (styles.css) Verifier",
       "status": "PASS",
-      "latency_ms": 186.44,
-      "details": "styles.css served: 44,622 bytes (184.8ms)"
+      "latency_ms": 80.54,
+      "details": "styles.css served: 44,622 bytes (77.8ms)"
     },
     {
       "id": "AGENT-97",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "Basit AI Master Project Suite ZIP Package Verifier",
       "status": "PASS",
-      "latency_ms": 0.56,
-      "details": "Master Project Suite zip: 41.68 MB"
+      "latency_ms": 1.09,
+      "details": "Master Project Suite zip: 29.30 MB"
     },
     {
       "id": "AGENT-98",
       "squadron": "Squadron 10: 24/7 Zero-Hang Watchdog",
       "title": "OmniTrade AI Matrix ZIP Package Verifier",
       "status": "PASS",
-      "latency_ms": 54.55,
-      "details": "OmniTrade zip: 0.37 MB"
+      "latency_ms": 1.78,
+      "details": "OmniTrade zip: 0.40 MB"
     },
     {
       "id": "AGENT-99",

@@ -1391,6 +1391,7 @@ async def serve_css():
     return FileResponse(dashboard_dir / "styles.css", media_type="text/css")
 
 @app.get("/health")
+@app.get("/api/health")
 def get_health():
     uptime = round(time.time() - START_TIME, 1)
     status_file = Path("E:/scalping-robot-v5/live_status.json")
