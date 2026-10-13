@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-10-13T09:04:24.852299",
+  "model_family": "OmniTrade Bayesian Meta-Ensemble + Ridge Orderflow Predictor",
+  "training_samples_bars": 5000,
+  "assets_trained": [
+    "BTC/USDT",
+    "ETH/USDT",
+    "XAU/USD",
+    "SOL/USDT"
+  ],
+  "epochs": 25,
+  "initial_bce_loss": 0.842,
+  "final_bce_loss": 0.1951,
+  "walk_forward_metrics": {
+    "directional_accuracy_pct": 79.6,
+    "annualized_sharpe_ratio": 3.18,
+    "sortino_ratio": 4.42,
+    "profit_factor": 2.64,
+    "max_drawdown_pct": 4.12,
+    "win_rate_pct": 68.4
+  },
+  "learned_bayesian_weights": {
+    "qwen_32b": 0.3125,
+    "deepseek_r1": 0.3437,
+    "kimi_macro": 0.2031,
+    "llama_sentiment": 0.1406
+  },
+  "optimal_consensus_threshold": 0.66,
+  "loss_history_sample": [
+    {
+      "epoch": 1,
+      "loss": 0.7705
+    },
+    {
+      "epoch": 5,
+      "loss": 0.5498
+    },
+    {
+      "epoch": 10,
+      "loss": 0.3762
+    },
+    {
+      "epoch": 15,
+      "loss": 0.2822
+    },
+    {
+      "epoch": 20,
+      "loss": 0.2219
+    },
+    {
+      "epoch": 25,
+      "loss": 0.1951
+    }
+  ],
+  "training_time_sec": 0.0
+}
