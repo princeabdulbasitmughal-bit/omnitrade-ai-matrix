@@ -738,11 +738,18 @@ def reset_circuit_breaker():
         risk_engine.circuit_breaker_timestamp = None
         risk_engine.soft_circuit_active = False
 
-        # Also reset portfolio daily drawdown tracking
+        # Also reset portfolio daily drawdown tracking and recalibrate high watermark
         if hasattr(portfolio, "daily_pnl"):
             portfolio.daily_pnl = 0.0
         if hasattr(portfolio, "daily_drawdown_pct"):
             portfolio.daily_drawdown_pct = 0.0
+        if hasattr(portfolio, "peak_equity"):
+            portfolio.peak_equity = float(portfolio.equity)
+        if hasattr(portfolio, "save_state"):
+            try:
+                portfolio.save_state()
+            except Exception:
+                pass
 
         logger.info(f"[MANUAL RESET] Circuit breaker manually cleared by operator. Was: {old_reason}")
         return JSONResponse(content={
@@ -793,16 +800,27 @@ def get_api_keys():
     return JSONResponse(content=sanitize_for_json(auth_mgr.list_keys()))
 
 @app.post("/api/webhook/tradingview")
-def handle_tradingview_webhook(request: Request, payload: Dict[str, Any] = Body(...)):
+async def handle_tradingview_webhook(request: Request, payload: Dict[str, Any] = Body(...)):
+    global latest_voice_script
     # Verify webhook secret if configured (prevents public tunnel abuse)
     if _TV_WEBHOOK_SECRET:
         incoming_secret = request.headers.get("X-TradingView-Secret", "")
         if incoming_secret != _TV_WEBHOOK_SECRET:
             raise HTTPException(status_code=401, detail="Invalid webhook secret.")
     parsed = WebhookManager.process_tradingview_alert(payload)
-    analysis = get_or_create_analysis(parsed["symbol"])
-    price = parsed["price"] if parsed["price"] > 0 else analysis["ticker"].get("last", 0.0)
-    atr = analysis["technical_indicators"].get("atr", price * 0.012)
+    price = float(parsed.get("price", 0.0) or 0.0)
+    norm_sym = parsed["symbol"].replace("-", "/").upper()
+    if norm_sym in live_market_cache:
+        c_asset = live_market_cache[norm_sym]
+        if price <= 0:
+            price = float(c_asset.get("ticker", {}).get("last", 0.0) or 0.0)
+        atr = float(c_asset.get("technical_indicators", {}).get("atr", price * 0.012) or (price * 0.012))
+    elif price > 0:
+        atr = price * 0.012
+    else:
+        analysis = get_or_create_analysis(parsed["symbol"])
+        price = float(analysis.get("ticker", {}).get("last", 0.0) or 0.0)
+        atr = float(analysis.get("technical_indicators", {}).get("atr", price * 0.012) or (price * 0.012))
     
     order_res = order_manager.execute_signal(
         symbol=parsed["symbol"],
@@ -811,11 +829,44 @@ def handle_tradingview_webhook(request: Request, payload: Dict[str, Any] = Body(
         atr=atr,
         reason=f"TRADINGVIEW_WEBHOOK_{parsed.get('strategy', 'EXT')}"
     )
+
+    # Real-Time WebSocket broadcast of webhook order-flow event
+    try:
+        await ws_manager.broadcast({
+            "type": "TRADINGVIEW_ALERT",
+            "data": {
+                "webhook": parsed,
+                "order": order_res,
+                "portfolio": portfolio.get_summary(),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        })
+    except Exception as ws_err:
+        logger.warning(f"WebSocket broadcast error on webhook: {ws_err}")
+
+    # Generate voice alert script if order placed
+    if order_res.get("status") in ("FILLED", "OPEN") and "position" in order_res:
+        try:
+            latest_voice_script = voice_broadcaster.generate_trade_speech_script("TRADE_OPEN", order_res.get("position", {}))
+            alert_dispatcher.send_trade_alert(order_res, ai_rationale=f"TradingView Alert: {parsed.get('strategy')}")
+        except Exception:
+            pass
+
     return JSONResponse(content=sanitize_for_json({"status": "SUCCESS", "order": order_res, "webhook": parsed}))
 
 @app.post("/api/webhook/mt5")
-def handle_mt5_webhook(payload: Dict[str, Any] = Body(...)):
+async def handle_mt5_webhook(payload: Dict[str, Any] = Body(...)):
     parsed = WebhookManager.process_mt5_bridge_event(payload)
+    try:
+        await ws_manager.broadcast({
+            "type": "MT5_BRIDGE_EVENT",
+            "data": {
+                "parsed": parsed,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        })
+    except Exception:
+        pass
     return JSONResponse(content=sanitize_for_json({"status": "SUCCESS", "parsed": parsed}))
 
 @app.get("/api/benchmark/competitors")
@@ -870,6 +921,25 @@ def trigger_fine_tune_epoch():
 def get_evolution_status():
     try:
         return JSONResponse(content=sanitize_for_json(evolution_engine.get_summary()))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/evolution/optimize")
+def trigger_evolution_epoch_step():
+    try:
+        live_rd = live_reality.get_real_data_summary()
+        live_port = live_reality.get_portfolio()
+        live_mt5 = live_reality.get_mt5_account()
+        for _ in range(50):
+            res = evolution_engine.execute_loop_evolution_step(live_rd, live_port, live_mt5)
+        return JSONResponse(content=sanitize_for_json({
+            "status": "EPOCH_ADVANCED",
+            "active_epoch": evolution_engine.active_epoch,
+            "cumulative_alpha_gain_pct": evolution_engine.cumulative_alpha_gain_pct,
+            "swarm_weights": evolution_engine.swarm_weights,
+            "current_loss": evolution_engine.current_loss,
+            "total_gradient_steps": evolution_engine.total_gradient_steps
+        }))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

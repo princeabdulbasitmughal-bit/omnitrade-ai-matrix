@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Tuple, Optional, List
 import numpy as np
 
@@ -63,13 +63,27 @@ class RiskEngine:
             logger.warning(f"CIRCUIT BREAKER TRIGGERED: {self.circuit_breaker_reason}")
             return True, self.circuit_breaker_reason
 
-        # 3. Consecutive Losses Circuit Breaker
+        # 3. Consecutive Losses Circuit Breaker (active only within 30-min cooldown window)
         if consecutive_losses >= self.max_consecutive_losses:
-            self.is_circuit_broken = True
-            self.circuit_breaker_reason = f"CONSECUTIVE LOSSES BREACH: {consecutive_losses} consecutive loss trades recorded (Limit: {self.max_consecutive_losses}). Cooldown enforced."
-            self.circuit_breaker_timestamp = datetime.utcnow().isoformat()
-            logger.warning(f"CIRCUIT BREAKER TRIGGERED: {self.circuit_breaker_reason}")
-            return True, self.circuit_breaker_reason
+            in_cooldown = True
+            if self.portfolio.trade_history:
+                try:
+                    last_closed = self.portfolio.trade_history[-1].get("closed_at", "")
+                    if last_closed:
+                        last_t = datetime.fromisoformat(str(last_closed).replace("Z", "+00:00"))
+                        now_t = datetime.now(timezone.utc)
+                        if last_t.tzinfo is None:
+                            last_t = last_t.replace(tzinfo=timezone.utc)
+                        if (now_t - last_t).total_seconds() > 1800.0:
+                            in_cooldown = False
+                except Exception:
+                    pass
+            if in_cooldown:
+                self.is_circuit_broken = True
+                self.circuit_breaker_reason = f"CONSECUTIVE LOSSES BREACH: {consecutive_losses} consecutive loss trades recorded (Limit: {self.max_consecutive_losses}). Cooldown enforced."
+                self.circuit_breaker_timestamp = datetime.utcnow().isoformat()
+                logger.warning(f"CIRCUIT BREAKER TRIGGERED: {self.circuit_breaker_reason}")
+                return True, self.circuit_breaker_reason
 
         # 4. Soft Circuit Precautionary Risk De-Rating (Daily DD >= 70% of limit)
         if daily_dd >= (self.max_daily_dd * 0.70):
