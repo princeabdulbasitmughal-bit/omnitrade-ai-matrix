@@ -1,32 +1,10 @@
 {
-  "cash": 6743.251132924319,
-  "equity": 8991.08762983657,
+  "cash": 8945.887480750569,
+  "equity": 8945.89,
   "peak_equity": 8991.08762983657,
-  "daily_start_equity": 8991.08762983657,
-  "daily_date": "2026-10-14",
-  "positions": {
-    "BTC/USDT": {
-      "id": "pos_1791943454296",
-      "symbol": "BTC/USDT",
-      "side": "BUY",
-      "amount": 0.0269,
-      "entry_price": 83500.07,
-      "current_price": 83500.07,
-      "margin": 2246.151883,
-      "sl": 81947.9,
-      "tp": [
-        85703.15,
-        87205.25,
-        89458.4
-      ],
-      "highest_price": 83500.07,
-      "lowest_price": 83500.07,
-      "unrealized_pnl": 0.0,
-      "unrealized_pnl_pct": 0.0,
-      "opened_at": "2026-10-14T07:04:14.296778",
-      "reason": "TRADINGVIEW_WEBHOOK_SMC_ORDER_BLOCK_ALPHA"
-    }
-  },
+  "daily_start_equity": 8960.33,
+  "daily_date": "2026-10-15",
+  "positions": {},
   "trade_history": [
     {
       "id": "pos_1787207672502",
@@ -727,8 +705,22 @@
       "closed_at": "2026-08-21T17:09:16.459259",
       "exit_reason": "STOP_LOSS",
       "open_reason": "AI Swarm Consensus: SELL (72.8%) | SMC: BEARISH_TREND (Lower Highs / Lower Lows)"
+    },
+    {
+      "id": "pos_1791943454296",
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "amount": 0.0269,
+      "entry_price": 83500.07,
+      "exit_price": 81943.85,
+      "pnl": -43.52,
+      "pnl_pct": -1.86,
+      "opened_at": "2026-10-14T07:04:14.296778",
+      "closed_at": "2026-10-15T16:32:48.891019",
+      "exit_reason": "STOP_LOSS",
+      "open_reason": "TRADINGVIEW_WEBHOOK_SMC_ORDER_BLOCK_ALPHA"
     }
   ],
   "orders": [],
-  "updated_at": "2026-10-14T07:04:14.296778"
+  "updated_at": "2026-10-15T16:32:48.891019"
 }
