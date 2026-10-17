@@ -62,7 +62,7 @@ LOCALTUNNEL_RETRIES         = 3     # npx localtunnel attempts
 NGROK_RETRIES               = 3
 BURST_BACKOFF_SECS          = 60    # wait between failure groups
 TUNNEL_UNAVAILABLE_AFTER_FAILURES = 15   # total failures → UNAVAILABLE
-BACKOFF_UNAVAILABLE_MINUTES = 30    # how long to sleep when UNAVAILABLE
+BACKOFF_UNAVAILABLE_MINUTES = 2     # short sleep when UNAVAILABLE then retry
 
 # ---- runtime state ----
 active_url          = None
@@ -200,6 +200,7 @@ def _try_cloudflared() -> bool:
         CLOUDFLARED_PATH, "tunnel",
         "--url", f"http://127.0.0.1:{LOCAL_PORT}",
         "--edge-ip-version", "4",
+        "--protocol", "http2",
         "--no-autoupdate",
     ]
     log(f"[Tier-1] Starting cloudflared: {' '.join(cmd)}")
@@ -285,6 +286,7 @@ def _try_localtunnel() -> bool:
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             text=True, bufsize=1, universal_newlines=True,
             encoding="utf-8", errors="replace",
+            shell=(sys.platform == "win32"),
         )
     except Exception as exc:
         log(f"[Tier-2] localtunnel launch error: {exc}")
