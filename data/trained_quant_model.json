@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-13T09:04:24.852299",
+  "timestamp": "2026-10-23T08:36:21.843500",
   "model_family": "OmniTrade Bayesian Meta-Ensemble + Ridge Orderflow Predictor",
   "training_samples_bars": 5000,
   "assets_trained": [
