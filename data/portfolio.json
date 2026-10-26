@@ -1,10 +1,32 @@
 {
-  "cash": 8945.887480750569,
+  "cash": 869.8233995912096,
   "equity": 8945.89,
   "peak_equity": 8991.08762983657,
-  "daily_start_equity": 8960.33,
-  "daily_date": "2026-10-15",
-  "positions": {},
+  "daily_start_equity": 8945.89,
+  "daily_date": "2026-10-26",
+  "positions": {
+    "ETH/USDT": {
+      "id": "pos_1792967134176",
+      "symbol": "ETH/USDT",
+      "side": "SELL",
+      "amount": 3.4892,
+      "entry_price": 2312.8544,
+      "current_price": 2312.8544,
+      "margin": 8070.01157248,
+      "sl": 2332.749,
+      "tp": [
+        2284.6766,
+        2265.4476,
+        2236.6042
+      ],
+      "highest_price": 2312.8544,
+      "lowest_price": 2312.8544,
+      "unrealized_pnl": 0.0,
+      "unrealized_pnl_pct": 0.0,
+      "opened_at": "2026-10-26T03:25:34.176829",
+      "reason": "AI Swarm Consensus: STRONG_SELL (71.7%) | SMC: BEARISH_TREND (Lower Highs / Lower Lows)"
+    }
+  },
   "trade_history": [
     {
       "id": "pos_1787207672502",
@@ -722,5 +744,5 @@
     }
   ],
   "orders": [],
-  "updated_at": "2026-10-15T16:32:48.891019"
+  "updated_at": "2026-10-26T03:25:34.176829"
 }
