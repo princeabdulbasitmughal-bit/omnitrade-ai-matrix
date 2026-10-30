@@ -1,51 +1,30 @@
 {
-  "cash": 651.1048586224597,
-  "equity": 8969.86,
-  "peak_equity": 8998.26,
-  "daily_start_equity": 8945.89,
-  "daily_date": "2026-10-26",
+  "cash": 9037.87365791871,
+  "equity": 9200.57,
+  "peak_equity": 9241.42,
+  "daily_start_equity": 8969.86,
+  "daily_date": "2026-10-30",
   "positions": {
-    "ETH/USDT": {
-      "id": "pos_1792967134176",
-      "symbol": "ETH/USDT",
+    "NVDA": {
+      "id": "pos_1793361066388",
+      "symbol": "NVDA",
       "side": "SELL",
-      "amount": 3.4892,
-      "entry_price": 2312.8544,
-      "current_price": 2304.25,
-      "margin": 8070.01157248,
-      "sl": 2332.749,
+      "amount": 0.8,
+      "entry_price": 203.3731,
+      "current_price": 203.44970703125,
+      "margin": 162.69848000000002,
+      "sl": 205.7489,
       "tp": [
-        2284.6766,
-        2265.4476,
-        2236.6042
+        200.0009,
+        197.7017,
+        194.2529
       ],
-      "highest_price": 2312.8544,
-      "lowest_price": 2296.11,
-      "unrealized_pnl": 30.02,
-      "unrealized_pnl_pct": 0.37,
-      "opened_at": "2026-10-26T03:25:34.176829",
-      "reason": "AI Swarm Consensus: STRONG_SELL (71.7%) | SMC: BEARISH_TREND (Lower Highs / Lower Lows)"
-    },
-    "BTC/USDT": {
-      "id": "pos_1792970677669",
-      "symbol": "BTC/USDT",
-      "side": "BUY",
-      "amount": 0.0023,
-      "entry_price": 95023.75,
-      "current_price": 95023.75,
-      "margin": 218.554625,
-      "sl": 94558.6411,
-      "tp": [
-        95662.0384,
-        96103.3974,
-        96765.4358
-      ],
-      "highest_price": 95023.75,
-      "lowest_price": 95023.75,
-      "unrealized_pnl": 0.0,
-      "unrealized_pnl_pct": 0.0,
-      "opened_at": "2026-10-26T04:24:37.669016",
-      "reason": "TRADINGVIEW_WEBHOOK_TradingView_External_Alert"
+      "highest_price": 203.3731,
+      "lowest_price": 203.3731,
+      "unrealized_pnl": -0.06,
+      "unrealized_pnl_pct": -0.04,
+      "opened_at": "2026-10-30T16:51:06.388223",
+      "reason": "AI Swarm Consensus: SELL (72.6%) | SMC: BULLISH_TREND (Higher Highs / Higher Lows)"
     }
   },
   "trade_history": [
@@ -762,8 +741,36 @@
       "closed_at": "2026-10-15T16:32:48.891019",
       "exit_reason": "STOP_LOSS",
       "open_reason": "TRADINGVIEW_WEBHOOK_SMC_ORDER_BLOCK_ALPHA"
+    },
+    {
+      "id": "pos_1792967134176",
+      "symbol": "ETH/USDT",
+      "side": "SELL",
+      "amount": 3.4892,
+      "entry_price": 2312.8544,
+      "exit_price": 2224.67,
+      "pnl": 301.87,
+      "pnl_pct": 3.81,
+      "opened_at": "2026-10-26T03:25:34.176829",
+      "closed_at": "2026-10-30T16:51:06.408995",
+      "exit_reason": "TAKE_PROFIT_3 (Final)",
+      "open_reason": "AI Swarm Consensus: STRONG_SELL (71.7%) | SMC: BEARISH_TREND (Lower Highs / Lower Lows)"
+    },
+    {
+      "id": "pos_1792970677669",
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "amount": 0.0023,
+      "entry_price": 95023.75,
+      "exit_price": 77321.67,
+      "pnl": -40.85,
+      "pnl_pct": -18.63,
+      "opened_at": "2026-10-26T04:24:37.669016",
+      "closed_at": "2026-10-30T16:51:06.429787",
+      "exit_reason": "STOP_LOSS",
+      "open_reason": "TRADINGVIEW_WEBHOOK_TradingView_External_Alert"
     }
   ],
   "orders": [],
-  "updated_at": "2026-10-26T04:24:37.669016"
+  "updated_at": "2026-10-30T16:51:06.429787"
 }
